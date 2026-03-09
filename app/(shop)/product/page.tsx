@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiFilter, FiSearch, FiShoppingCart, FiChevronRight,FiHeart, FiGrid, FiList, FiRefreshCw } from "react-icons/fi";
+import { FiFilter, FiSearch, FiChevronRight, FiHeart, FiGrid, FiList, FiRefreshCw } from "react-icons/fi";
 import { useSearchParams } from "next/navigation";
 
 interface Product {
@@ -14,8 +14,8 @@ interface Product {
   category?: string;
 }
 
-
-export default function ProductsPage() {
+// --- 1. Main logic component wrap in Suspense ---
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +27,6 @@ export default function ProductsPage() {
   // --- WHITELIST STATE ---
   const [whitelistIds, setWhitelistIds] = useState<string[]>([]);
 
-
   // Load whitelist from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("whitelist");
@@ -38,13 +37,11 @@ export default function ProductsPage() {
 
   const toggleWhitelist = (id: string) => {
     let updated;
-
     if (whitelistIds.includes(id)) {
-      updated = whitelistIds.filter(item => item !== id);
+      updated = whitelistIds.filter((item) => item !== id);
     } else {
       updated = [...whitelistIds, id];
     }
-
     setWhitelistIds(updated);
     localStorage.setItem("whitelist", JSON.stringify(updated));
   };
@@ -131,7 +128,6 @@ export default function ProductsPage() {
 
       <div className="max-w-7xl mx-auto px-6 -mt-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
-
           {/* --- SIDEBAR FILTERS --- */}
           <aside className="space-y-8 bg-white p-6 sm:p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-fit lg:sticky lg:top-24">
             <div>
@@ -141,7 +137,10 @@ export default function ProductsPage() {
                 </h3>
                 {(selectedCategory !== "All" || searchQuery !== "") && (
                   <button
-                    onClick={() => { setSelectedCategory("All"); setSearchQuery(""); }}
+                    onClick={() => {
+                      setSelectedCategory("All");
+                      setSearchQuery("");
+                    }}
                     className="text-[10px] font-bold text-emerald-600 hover:underline underline-offset-4"
                   >
                     RESET
@@ -165,13 +164,17 @@ export default function ProductsPage() {
 
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-slate-900 font-black uppercase text-xs tracking-widest text-slate-400">Price Range</h3>
-                <span className="text-xs font-black text-emerald-600">₹{maxPrice.toLocaleString("en-IN")}</span>
+                <h3 className="text-slate-900 font-black uppercase text-xs tracking-widest text-slate-400">
+                  Price Range
+                </h3>
+                <span className="text-xs font-black text-emerald-600">
+                  ₹{maxPrice.toLocaleString("en-IN")}
+                </span>
               </div>
               <input
                 type="range"
                 min="0"
-                max={products.length > 0 ? Math.max(...products.map(p => p.price)) : 100000}
+                max={products.length > 0 ? Math.max(...products.map((p) => p.price)) : 100000}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="w-full accent-emerald-500 cursor-pointer"
@@ -188,7 +191,12 @@ export default function ProductsPage() {
             <div className="flex items-center justify-between mb-8 text-slate-500 font-medium px-2">
               <p className="text-sm">
                 Showing <span className="text-slate-900 font-bold">{filteredProducts.length}</span> results
-                {selectedCategory !== "All" && <span> in <span className="text-emerald-600">{selectedCategory}</span></span>}
+                {selectedCategory !== "All" && (
+                  <span>
+                    {" "}
+                    in <span className="text-emerald-600">{selectedCategory}</span>
+                  </span>
+                )}
               </p>
               <div className="flex items-center gap-4 text-slate-400">
                 <FiGrid className="text-emerald-500 cursor-pointer size-5" />
@@ -201,10 +209,7 @@ export default function ProductsPage() {
             ) : error ? (
               <ErrorState error={error} retry={fetchProducts} />
             ) : (
-              <motion.div
-                layout
-                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"
-              >
+              <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                 <AnimatePresence mode="popLayout">
                   {filteredProducts.map((product, idx) => (
                     <ProductCard
@@ -222,9 +227,14 @@ export default function ProductsPage() {
             {!loading && filteredProducts.length === 0 && (
               <div className="text-center py-40 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
                 <FiSearch className="mx-auto size-12 text-slate-200 mb-4" />
-                <p className="text-slate-400 font-bold text-xl italic">"No items match your specific filters"</p>
+                <p className="text-slate-400 font-bold text-xl italic">
+                  "No items match your specific filters"
+                </p>
                 <button
-                  onClick={() => { setSelectedCategory("All"); setSearchQuery(""); }}
+                  onClick={() => {
+                    setSelectedCategory("All");
+                    setSearchQuery("");
+                  }}
                   className="mt-4 text-emerald-500 font-bold hover:underline"
                 >
                   Clear all filters
@@ -238,25 +248,36 @@ export default function ProductsPage() {
   );
 }
 
+// --- 2. Final Export with Suspense ---
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<LoadingGrid />}>
+      <ProductsContent />
+    </Suspense>
+  );
+}
+
 /* --- SUB-COMPONENTS --- */
 
-function ProductCard({ product, index, isWhitelisted,
-  onToggle }: {
-    product: Product; index: number, isWhitelisted: boolean;
-    onToggle: () => void;
-  }) {
-
-  // Dynamic Discount Logic: Product ID ke base par alag alag discount
+function ProductCard({
+  product,
+  index,
+  isWhitelisted,
+  onToggle,
+}: {
+  product: Product;
+  index: number;
+  isWhitelisted: boolean;
+  onToggle: () => void;
+}) {
   const getDiscount = (id: string, category: string) => {
     const lastDigit = id.slice(-1).charCodeAt(0);
-    if (category === "Electronics") return 15 + (lastDigit % 11); // 15-25%
-    if (category === "Fashion") return 30 + (lastDigit % 11);     // 30-40%
-    return 20 + (lastDigit % 11);                                 // Default 20-30%
+    if (category === "Electronics") return 15 + (lastDigit % 11);
+    if (category === "Fashion") return 30 + (lastDigit % 11);
+    return 20 + (lastDigit % 11);
   };
 
   const discountPercent = getDiscount(product._id, product.category || "General");
-
-  // Real price is the selling price, calculating MRP (mrp = price / (1 - discount%))
   const mrp = Math.round(product.price / (1 - discountPercent / 100));
 
   return (
@@ -277,7 +298,6 @@ function ProductCard({ product, index, isWhitelisted,
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
 
-          {/* --- CURVED MODERN BADGE (Top Left) --- */}
           <div className="absolute top-0 left-0">
             <div className="bg-rose-600 text-white text-[10px] font-black px-4 py-2 rounded-br-[1.5rem] shadow-lg flex flex-col items-center">
               <span className="leading-none">{discountPercent}%</span>
@@ -292,10 +312,12 @@ function ProductCard({ product, index, isWhitelisted,
             }}
             className={`absolute top-2 right-3 backdrop-blur-md p-3 rounded-2xl shadow-lg 
                         transition-all transform translate-y-2 group-hover:translate-y-0
-                          opacity-0 group-hover:opacity-100
-                    ${isWhitelisted
-                ? "bg-rose-500 text-white opacity-100"
-                : "bg-white/90 text-slate-400 hover:text-rose-500"}
+                         opacity-0 group-hover:opacity-100
+                    ${
+                      isWhitelisted
+                        ? "bg-rose-500 text-white opacity-100"
+                        : "bg-white/90 text-slate-400 hover:text-rose-500"
+                    }
   `}
           >
             <FiHeart fill={isWhitelisted ? "white" : "none"} className="size-5" />
@@ -321,7 +343,10 @@ function ProductCard({ product, index, isWhitelisted,
               ₹{product.price.toLocaleString("en-IN")}
             </p>
           </div>
-          <Link href={`/product/${product._id}`} className="text-xs font-black uppercase text-slate-400 group-hover:text-emerald-500 transition-colors mb-1">
+          <Link
+            href={`/product/${product._id}`}
+            className="text-xs font-black uppercase text-slate-400 group-hover:text-emerald-500 transition-colors mb-1"
+          >
             Details +
           </Link>
         </div>
@@ -330,17 +355,28 @@ function ProductCard({ product, index, isWhitelisted,
   );
 }
 
-function FilterOption({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function FilterOption({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center justify-between py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-300 ${active
-        ? 'bg-emerald-50 text-emerald-600 font-bold translate-x-2'
-        : 'text-slate-500 hover:bg-slate-50 hover:translate-x-1'
-        }`}
+      className={`flex items-center justify-between py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-300 ${
+        active
+          ? "bg-emerald-50 text-emerald-600 font-bold translate-x-2"
+          : "text-slate-500 hover:bg-slate-50 hover:translate-x-1"
+      }`}
     >
       <span className="text-sm tracking-tight capitalize">{label}</span>
-      {active && <motion.div layoutId="activeDot" className="size-1.5 bg-emerald-500 rounded-full" />}
+      {active && (
+        <motion.div layoutId="activeDot" className="size-1.5 bg-emerald-500 rounded-full" />
+      )}
     </div>
   );
 }
