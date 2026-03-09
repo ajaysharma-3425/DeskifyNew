@@ -16,10 +16,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, description, price, category, images, stock } =
+    const { name, description, price, category, image, stock } =
       await req.json();
 
-    if (!name || !description || !price || !category) {
+    if (!name || !description || !price || !category || !image) {
       return NextResponse.json(
         { message: "All fields required" },
         { status: 400 }
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       description,
       price,
       category,
-      images,
+      image,
       stock,
     });
 

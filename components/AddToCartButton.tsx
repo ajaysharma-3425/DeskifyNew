@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useCart } from "@/context/CartContext";   // 👈 import
 
-export default function AddToCartButton({ productId }: { productId: string }) {
+export default function AddToCartButton({
+  productId,
+  quantity = 1
+}: {
+  productId: string;
+  quantity?: number;
+}) {
   const [loading, setLoading] = useState(false);
+  const { refreshCart } = useCart();   // 👈 useCart hook
 
+  // AddToCartButton.tsx 
   const addToCart = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -20,12 +29,16 @@ export default function AddToCartButton({ productId }: { productId: string }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ productId, quantity: 1 }),
+        body: JSON.stringify({ productId, quantity }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
+        // ✅ Step 1: Context ko refresh karo (Ye api/cart fetch karega automatically)
+        await refreshCart();
+
+        // ✅ Step 2: Confirmation
         alert("Added to cart 🛒");
       } else {
         alert(data.message || "Something went wrong");

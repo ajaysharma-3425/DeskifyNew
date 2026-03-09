@@ -3,8 +3,7 @@ export interface Product {
   name: string;
   price: number;
   description: string;
-  category: "gents" | "ladies";
-  images: string[];
+  image: string;
   sizes: string[];
   stock: number;
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
@@ -30,15 +31,29 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
+      role: "user", // default role
     });
 
+    // 🔥 CREATE TOKEN
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    );
+
     return NextResponse.json(
-      { message: "User created successfully", user },
+      {
+        message: "User created successfully",
+        token,
+      },
       { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
-      { message: "Signup error", error },
+      { message: "Signup error" },
       { status: 500 }
     );
   }

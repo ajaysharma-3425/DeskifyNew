@@ -12,11 +12,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Admin only" }, { status: 403 });
     }
 
-    const { orderId, status } = await req.json();
+    const { orderId, status, reason } = await req.json();
 
     if (!orderId || !status) {
       return NextResponse.json(
         { message: "Order ID and status required" },
+        { status: 400 }
+      );
+    }
+
+    const allowedStatuses = [
+      "pending",
+      "paid",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return NextResponse.json(
+        { message: "Invalid status value" },
         { status: 400 }
       );
     }
@@ -27,6 +42,25 @@ export async function POST(req: Request) {
         { message: "Order not found" },
         { status: 404 }
       );
+    }
+
+    // Prevent changing cancelled or delivered orders
+    if (order.status === "cancelled" || order.status === "delivered") {
+      return NextResponse.json(
+        { message: "Order cannot be modified" },
+        { status: 400 }
+      );
+    }
+
+    // If cancelling → reason required
+    if (status === "cancelled") {
+      if (!reason) {
+        return NextResponse.json(
+          { message: "Cancel reason required" },
+          { status: 400 }
+        );
+      }
+      order.cancelReason = reason;
     }
 
     order.status = status;

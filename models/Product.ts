@@ -5,7 +5,7 @@ export interface IProduct {
   description: string;
   price: number;
   category: string;
-  images: string[];
+  image: string;
   stock: number;
   createdAt: Date;
 }
@@ -28,11 +28,11 @@ const ProductSchema = new Schema<IProduct>(
       type: String,
       required: true,
     },
-    images: [
-      {
-        type: String,
-      },
-    ],
+    image:
+    {
+      type: String,
+      required: true,
+    },
     stock: {
       type: Number,
       default: 0,

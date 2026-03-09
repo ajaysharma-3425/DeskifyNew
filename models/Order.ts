@@ -31,7 +31,18 @@ const OrderSchema = new Schema(
 
     status: {
       type: String,
-      default: "pending", // pending → paid → shipped → delivered
+      enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
+
+    cancelReason: {
+      type: String,
+      default: "",
+    },
+
+    cancelledBy: {
+      type: String,
+      enum: ["user", "admin"],
     },
 
     shippingAddress: {
@@ -41,6 +52,10 @@ const OrderSchema = new Schema(
       city: String,
       pincode: String,
     },
+    // Isse apne existing Order model mein add karein
+    paymentMethod: { type: String, enum: ["COD", "ONLINE"], default: "COD" },
+    paymentStatus: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
+    transactionId: { type: String, default: "" },
   },
   { timestamps: true }
 );
