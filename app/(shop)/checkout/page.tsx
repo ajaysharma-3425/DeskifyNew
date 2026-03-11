@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiLock, FiChevronLeft, FiMapPin, FiTruck, FiCreditCard, FiCheckCircle } from "react-icons/fi";
+import { FiTruck, FiCreditCard, FiActivity } from "react-icons/fi";
 
 // --- INTERFACE FOR PAYMENT MODAL PROPS ---
 interface PaymentModalProps {
@@ -44,22 +43,24 @@ function PaymentModal({ total, onConfirm, onClose, placing }: PaymentModalProps)
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }} 
         animate={{ scale: 1, opacity: 1 }} 
-        className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl relative border border-slate-100 dark:border-slate-800"
+        className="bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl relative border border-slate-100 dark:border-white/10"
       >
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 italic">DESKIFY <span className="text-emerald-500">PAY</span></h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 italic">
+          DESKIFY <span className="text-emerald-500">PAY</span>
+        </h2>
         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 font-medium">Scan QR to pay securely via any UPI App.</p>
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-6 flex flex-col items-center mb-6">
+        <div className="bg-slate-50 dark:bg-white/5 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-3xl p-6 flex flex-col items-center mb-6">
           <img 
             src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=deskify@upi&pn=DeskifyStore&am=${total}`} 
             alt="QR" 
             className="size-40 mb-4 rounded-xl" 
           />
-          <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 tracking-widest uppercase text-center">UPI ID: deskify@store</p>
+          <p className="text-[10px] font-black text-slate-400 dark:text-white/40 tracking-widest uppercase text-center">UPI ID: deskify@store</p>
         </div>
 
         <div className="space-y-4">
-          <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+          <div className="flex justify-between items-center bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
             <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Total Amount</span>
             <span className="text-xl font-black text-emerald-700 dark:text-emerald-400">₹{total.toLocaleString()}</span>
           </div>
@@ -70,7 +71,7 @@ function PaymentModal({ total, onConfirm, onClose, placing }: PaymentModalProps)
               placeholder="Enter 12-digit Transaction ID"
               value={txnId}
               onChange={handleTxnChange}
-              className="w-full p-4 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600"
+              className="w-full p-4 bg-slate-100 dark:bg-white/5 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20"
             />
             {txnError && <p className="text-rose-500 text-xs mt-1 font-medium">{txnError}</p>}
           </div>
@@ -78,12 +79,12 @@ function PaymentModal({ total, onConfirm, onClose, placing }: PaymentModalProps)
           <button
             disabled={!txnId || txnError !== "" || placing}
             onClick={handleConfirm}
-            className="w-full py-4 bg-slate-900 dark:bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all disabled:opacity-50"
+            className="w-full py-4 bg-slate-900 dark:bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-600 transition-all disabled:opacity-50 active:scale-95"
           >
             {placing ? "VERIFYING..." : "I HAVE PAID"}
           </button>
 
-          {!placing && <button onClick={onClose} className="w-full text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest mt-2 hover:text-slate-600">Cancel</button>}
+          {!placing && <button onClick={onClose} className="w-full text-slate-400 dark:text-white/40 text-xs font-bold uppercase tracking-widest mt-2">Cancel</button>}
         </div>
       </motion.div>
     </div>
@@ -120,7 +121,7 @@ export default function CheckoutPage() {
 
   const validate = () => {
     let newErrors: any = {};
-    if (!address.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!address.fullName.trim()) newErrors.fullName = "Name is required";
     if (!address.phone || !/^\d{10}$/.test(address.phone)) newErrors.phone = "Valid 10-digit phone required";
     if (!address.addressLine.trim()) newErrors.addressLine = "Address is required";
     if (!address.city.trim()) newErrors.city = "City is required";
@@ -154,10 +155,10 @@ export default function CheckoutPage() {
     finally { setPlacing(false); setShowModal(false); }
   };
 
-  if (loading) return <div className="p-20 text-center font-black dark:text-white">LOADING DESKIFY...</div>;
+  if (loading) return <div className="p-20 text-center font-black dark:text-white transition-colors">LOADING DESKIFY...</div>;
 
   return (
-    <div className="min-h-screen bg-[#FBFBFB] dark:bg-slate-950 pt-24 pb-20 px-6 transition-colors">
+    <div className="min-h-screen bg-transparent pt-24 pb-20 px-6 transition-colors">
       <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-16">
 
         {/* LEFT: SHIPPING & PAYMENT */}
@@ -202,12 +203,12 @@ export default function CheckoutPage() {
 
         {/* RIGHT: SUMMARY */}
         <div className="lg:col-span-5">
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl sticky top-28">
-            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-white">ORDER SUMMARY</h3>
+          <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/10 shadow-xl sticky top-28 backdrop-blur-sm">
+            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-white uppercase">Order Summary</h3>
             <div className="space-y-4 mb-8">
               <SummaryRow label="Subtotal" value={`₹${subtotal.toLocaleString()}`} />
               <SummaryRow label="Shipping" value={shipping === 0 ? 'FREE' : `₹${shipping}`} />
-              <div className="flex justify-between items-end pt-4 border-t border-slate-100 dark:border-slate-800 text-2xl font-black text-slate-900 dark:text-white">
+              <div className="flex justify-between items-end pt-4 border-t border-slate-100 dark:border-white/10 text-2xl font-black text-slate-900 dark:text-white">
                 <span>Total</span><span>₹{total.toLocaleString()}</span>
               </div>
             </div>
@@ -238,7 +239,7 @@ export default function CheckoutPage() {
   );
 }
 
-// --- REUSABLE COMPONENTS FOR BETTER DARK MODE SUPPORT ---
+// --- REUSABLE COMPONENTS WITH SYNCED TEXT COLORS ---
 
 function Input({ name, placeholder, value, onChange, error, maxLength }: any) {
   return (
@@ -247,9 +248,9 @@ function Input({ name, placeholder, value, onChange, error, maxLength }: any) {
         name={name}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 dark:focus:ring-emerald-500/20 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 ${
-          error ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/10' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
-        }`}
+        className={`p-4 border rounded-2xl w-full transition-all outline-none text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 ${
+          error ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10' : 'border-slate-200 dark:border-white/10 bg-white dark:bg-white/5'
+        } focus:ring-2 focus:ring-black/5 dark:focus:ring-emerald-500/20`}
         value={value}
         onChange={onChange}
       />
@@ -264,21 +265,21 @@ function PaymentOption({ active, onClick, icon, label }: any) {
       onClick={onClick} 
       className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
         active 
-        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10' 
-        : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'
+        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' 
+        : 'border-slate-100 dark:border-white/10 bg-white dark:bg-white/5'
       }`}
     >
-      <div className={active ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-600'}>{icon}</div>
-      <span className={`font-black text-xs uppercase tracking-widest ${active ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-500'}`}>{label}</span>
+      <div className={active ? 'text-emerald-500' : 'text-slate-400 dark:text-white/30'}>{icon}</div>
+      <span className={`font-black text-[10px] md:text-xs uppercase tracking-widest ${active ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-white/40'}`}>{label}</span>
     </button>
   );
 }
 
 function SummaryRow({ label, value }: any) {
   return (
-    <div className="flex justify-between text-slate-500 dark:text-slate-400 font-bold text-sm">
-      <span>{label}</span>
-      <span className="text-slate-900 dark:text-slate-200">{value}</span>
+    <div className="flex justify-between font-bold text-sm">
+      <span className="text-slate-500 dark:text-white/40">{label}</span>
+      <span className="text-slate-900 dark:text-white">{value}</span>
     </div>
   );
 }
