@@ -68,6 +68,27 @@ export default function ProductDetails() {
     fetchFullData();
   }, [id]);
 
+  useEffect(() => {
+    if (id) {
+      const saved = JSON.parse(localStorage.getItem("whitelist") || "[]");
+      setIsWishlisted(saved.includes(id));
+    }
+  }, [id]);
+
+  // 2. Toggle Whitelist Function
+  const toggleWhitelist = () => {
+    const saved = JSON.parse(localStorage.getItem("whitelist") || "[]");
+    let updated;
+    if (saved.includes(id)) {
+      updated = saved.filter((itemId: string) => itemId !== id);
+      setIsWishlisted(false);
+    } else {
+      updated = [...saved, id];
+      setIsWishlisted(true);
+    }
+    localStorage.setItem("whitelist", JSON.stringify(updated));
+  };
+
   const discountPercent = useMemo(() => {
     if (!product) return 0;
     return getDiscount(product._id, product.category || "General");
@@ -117,12 +138,14 @@ export default function ProductDetails() {
                 alt={product.name}
                 className="w-full h-full object-contain p-8 lg:p-16 group-hover:scale-105 transition-transform duration-1000"
               />
-              
+
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className="absolute top-6 right-6 p-4 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg text-slate-900 hover:bg-white transition-all active:scale-90"
+                onClick={toggleWhitelist} // Yahan change kiya
+                className={`absolute top-6 right-6 p-4 backdrop-blur-md rounded-2xl shadow-lg transition-all active:scale-90
+    opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0
+    ${isWishlisted ? "bg-rose-500 text-white" : "bg-white/80 text-slate-400 hover:text-rose-500"}`}
               >
-                <FiHeart className={isWishlisted ? "fill-rose-500 text-rose-500" : "text-slate-400"} size={22} />
+                <FiHeart className={isWishlisted ? "fill-white" : ""} size={22} />
               </button>
             </motion.div>
           </div>
@@ -160,9 +183,9 @@ export default function ProductDetails() {
 
             {/* ACTION CARD */}
             <div className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/30 space-y-8 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-               
-               <div className="flex items-center justify-between relative z-10">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
+
+              <div className="flex items-center justify-between relative z-10">
                 <span className="text-slate-900 font-black uppercase text-xs tracking-widest">Select Quantity</span>
                 <div className="flex items-center bg-slate-50 rounded-2xl p-1.5 border border-slate-200 shadow-inner">
                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:text-emerald-500 transition-colors"><FiMinus /></button>
@@ -200,19 +223,19 @@ export default function ProductDetails() {
 
           <div className="max-w-4xl min-h-[200px] mx-auto lg:mx-0">
             <AnimatePresence mode="wait">
-              <motion.div 
-                key={activeTab} 
-                initial={{ opacity: 0, x: -10 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 10 }} 
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
                 className="text-slate-600 text-lg leading-relaxed font-medium"
               >
                 {activeTab === 'description' && (
-                    <div className="space-y-4">
-                        <p className="whitespace-pre-line first-letter:text-5xl first-letter:font-black first-letter:text-emerald-500 first-letter:mr-3 first-letter:float-left">
-                            {product.description}
-                        </p>
-                    </div>
+                  <div className="space-y-4">
+                    <p className="whitespace-pre-line first-letter:text-5xl first-letter:font-black first-letter:text-emerald-500 first-letter:mr-3 first-letter:float-left">
+                      {product.description}
+                    </p>
+                  </div>
                 )}
                 {activeTab === 'specs' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -279,7 +302,7 @@ function RelatedCard({ product, getDiscount }: { product: Product, getDiscount: 
       <div className="relative aspect-square bg-[#F8F9FA] rounded-[2rem] overflow-hidden mb-6">
         {/* MINI BADGE */}
         <div className="absolute top-0 left-0 z-10 bg-rose-500 text-white text-[9px] font-black px-3 py-1.5 rounded-br-2xl">
-            {discount}% OFF
+          {discount}% OFF
         </div>
         <img src={product.image} className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700" alt={product.name} />
       </div>
@@ -305,12 +328,12 @@ function TrustBadge({ icon, label, sub }: { icon: any, label: string, sub: strin
 }
 
 function SpecItem({ label, value }: { label: string, value: string }) {
-    return (
-        <div className="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
-            <span className="text-slate-900 font-bold">{value}</span>
-        </div>
-    )
+  return (
+    <div className="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-100">
+      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
+      <span className="text-slate-900 font-bold">{value}</span>
+    </div>
+  )
 }
 
 function TabButton({ children, active, onClick }: any) {
@@ -346,7 +369,7 @@ function ErrorState({ error }: { error: string | null }) {
     <div className="max-w-7xl mx-auto px-6 py-40 text-center">
       <div className="bg-rose-50 rounded-[4rem] p-16 md:p-24 border-2 border-dashed border-rose-100 max-w-3xl mx-auto">
         <div className="bg-rose-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-rose-200">
-            <FiRotateCcw className="text-white text-3xl" />
+          <FiRotateCcw className="text-white text-3xl" />
         </div>
         <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">Protocol Terminated</h2>
         <p className="text-slate-500 font-medium mb-12 text-lg italic">“{error || "The item could not be retrieved from the main server."}”</p>

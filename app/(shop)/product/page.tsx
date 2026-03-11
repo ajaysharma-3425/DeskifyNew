@@ -311,14 +311,14 @@ function ProductCard({
               onToggle();
             }}
             className={`absolute top-2 right-3 backdrop-blur-md p-3 rounded-2xl shadow-lg 
-                        transition-all transform translate-y-2 group-hover:translate-y-0
-                         opacity-0 group-hover:opacity-100
-                    ${
-                      isWhitelisted
-                        ? "bg-rose-500 text-white opacity-100"
-                        : "bg-white/90 text-slate-400 hover:text-rose-500"
-                    }
-  `}
+    transition-all transform
+    /* Mobile: Hamesha dikhega (opacity-100) | Desktop (md): Sirf hover par dikhega */
+    opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0
+    ${isWhitelisted
+                ? "bg-rose-500 text-white opacity-100"
+                : "bg-white/90 text-slate-400 hover:text-rose-500"
+              }
+`}
           >
             <FiHeart fill={isWhitelisted ? "white" : "none"} className="size-5" />
           </button>
@@ -367,11 +367,10 @@ function FilterOption({
   return (
     <div
       onClick={onClick}
-      className={`flex items-center justify-between py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-300 ${
-        active
+      className={`flex items-center justify-between py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-300 ${active
           ? "bg-emerald-50 text-emerald-600 font-bold translate-x-2"
           : "text-slate-500 hover:bg-slate-50 hover:translate-x-1"
-      }`}
+        }`}
     >
       <span className="text-sm tracking-tight capitalize">{label}</span>
       {active && (
