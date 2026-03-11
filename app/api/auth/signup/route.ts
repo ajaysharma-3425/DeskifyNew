@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     // 🔥 CREATE TOKEN
     const token = jwt.sign(
       {
-        id: user._id,
+        userId: user._id,
         role: user.role,
       },
       process.env.JWT_SECRET!,
@@ -48,6 +48,12 @@ export async function POST(req: Request) {
       {
         message: "User created successfully",
         token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       },
       { status: 201 }
     );
