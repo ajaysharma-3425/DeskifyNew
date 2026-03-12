@@ -319,7 +319,7 @@ export default function CheckoutPage() {
                 <span>Shipping</span>
                 <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
               </div>
-              <div className="flex justify-between items-end pt-4 border-t border-slate-200 dark:border-slate-500 text-2xl font-black text-slate-900 dark:text-slate-100">
+              <div className="flex justify-between items-end pt-4 border-t border-slate-200 dark:border-slate-500 text-2xl font-black text-slate-900 dark:text-slate-900">
                 <span>Total</span>
                 <span>₹{total.toLocaleString()}</span>
               </div>
