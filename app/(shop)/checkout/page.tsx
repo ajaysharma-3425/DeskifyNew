@@ -196,15 +196,15 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-12">
           <section id="shipping-section">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-8 text-black dark:text-white rounded-full flex items-center justify-center text-sm">1</span>
-              <span className="text-slate-900 dark:text-slate-100">SHIPPING DETAILS</span>
+              <span className="w-8 h-8 text-black dark:text-black rounded-full flex items-center justify-center text-sm">1</span>
+              <span className="text-slate-900 dark:text-slate-900">SHIPPING DETAILS</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-1">
                 <input
                   name="fullName"
                   placeholder="Full Name"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
                     errors.fullName ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.fullName}
@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                 <input
                   name="phone"
                   placeholder="10-Digit Phone Number"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
                     errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.phone}
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                 <input
                   name="addressLine"
                   placeholder="Street Address / House No."
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
                     errors.addressLine ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.addressLine}
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                 <input
                   name="city"
                   placeholder="City"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
                     errors.city ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.city}
@@ -257,7 +257,7 @@ export default function CheckoutPage() {
                 <input
                   name="pincode"
                   placeholder="6-Digit Pincode"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
                     errors.pincode ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.pincode}
