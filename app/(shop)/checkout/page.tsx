@@ -196,7 +196,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-12">
           <section id="shipping-section">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-8 text-black dark:text-black rounded-full flex items-center justify-center text-sm">1</span>
+              <span className="w-8 h-8 text-black dark:text-black bg-black rounded-full flex items-center justify-center text-sm">1</span>
               <span className="text-slate-900 dark:text-slate-900">SHIPPING DETAILS</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +218,7 @@ export default function CheckoutPage() {
                   name="phone"
                   placeholder="10-Digit Phone Number"
                   className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-100' : 'border-emerald-400 dark:border-emerald-400'
                   }`}
                   value={address.phone}
                   onChange={handleInputChange}
@@ -272,8 +272,8 @@ export default function CheckoutPage() {
           {/* PAYMENT SECTION (Same as yours) */}
           <section>
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-8 bg-black text-white dark:text-white rounded-full flex items-center justify-center text-sm">2</span>
-              <span className="text-slate-900 dark:text-slate-100">PAYMENT METHOD</span>
+              <span className="w-8 h-8 bg-black text-white dark:text-black rounded-full flex items-center justify-center text-sm">2</span>
+              <span className="text-slate-900 dark:text-slate-900">PAYMENT METHOD</span>
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                 }`}
               >
                 <FiCreditCard size={24} className={paymentMethod === 'ONLINE' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
-                <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'ONLINE' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-300'}`}>
+                <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'ONLINE' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-900'}`}>
                   Online / QR Scan
                 </span>
               </button>
@@ -308,18 +308,18 @@ export default function CheckoutPage() {
 
         {/* RIGHT: SUMMARY */}
         <div className="lg:col-span-5">
-          <div className="bg-white dark:bg-white p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-100 shadow-xl sticky top-28">
-            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-slate-100">ORDER SUMMARY</h3>
+          <div className="bg-white dark:bg-white p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-900 shadow-xl sticky top-28">
+            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-slate-900">ORDER SUMMARY</h3>
             <div className="space-y-4 mb-8">
-              <div className="flex justify-between text-slate-500 dark:text-slate-300 font-bold text-sm">
+              <div className="flex justify-between text-slate-500 dark:text-slate-900 font-bold text-sm">
                 <span>Subtotal</span>
                 <span>₹{subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-slate-500 dark:text-slate-300 font-bold text-sm">
+              <div className="flex justify-between text-slate-500 dark:text-slate-900 font-bold text-sm">
                 <span>Shipping</span>
                 <span>{shipping === 0 ? 'FREE' : `₹${shipping}`}</span>
               </div>
-              <div className="flex justify-between items-end pt-4 border-t border-slate-200 dark:border-slate-200 text-2xl font-black text-slate-900 dark:text-slate-100">
+              <div className="flex justify-between items-end pt-4 border-t border-slate-200 dark:border-slate-500 text-2xl font-black text-slate-900 dark:text-slate-100">
                 <span>Total</span>
                 <span>₹{total.toLocaleString()}</span>
               </div>
@@ -334,7 +334,7 @@ export default function CheckoutPage() {
                 }
               }}
               disabled={placing}
-              className="w-full py-5 bg-slate-900 text-white dark:text-white rounded-2xl font-black hover:bg-black transition-all active:scale-95 disabled:opacity-50"
+              className="w-full py-5 bg-slate-900 text-white dark:text-black rounded-2xl font-black hover:bg-black transition-all active:scale-95 disabled:opacity-50"
             >
               {placing ? "PROCESSING..." : (paymentMethod === "ONLINE" ? "PAY & FINISH" : "PLACE ORDER")}
             </button>
