@@ -196,7 +196,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-12">
           <section id="shipping-section">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-8 bg-black text-white dark:text-white rounded-full flex items-center justify-center text-sm">1</span>
+              <span className="w-8 h-8 text-black dark:text-white rounded-full flex items-center justify-center text-sm">1</span>
               <span className="text-slate-900 dark:text-slate-100">SHIPPING DETAILS</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,8 +204,9 @@ export default function CheckoutPage() {
                 <input
                   name="fullName"
                   placeholder="Full Name"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100 ${errors.fullName ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-slate-200 dark:border-slate-200'
-                    }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                    errors.fullName ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                  }`}
                   value={address.fullName}
                   onChange={handleInputChange}
                 />
@@ -216,8 +217,9 @@ export default function CheckoutPage() {
                 <input
                   name="phone"
                   placeholder="10-Digit Phone Number"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100 ${errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-slate-200 dark:border-slate-200'
-                    }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                    errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                  }`}
                   value={address.phone}
                   onChange={handleInputChange}
                   maxLength={10}
@@ -229,8 +231,9 @@ export default function CheckoutPage() {
                 <input
                   name="addressLine"
                   placeholder="Street Address / House No."
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100 ${errors.addressLine ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-slate-200 dark:border-slate-200'
-                    }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                    errors.addressLine ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                  }`}
                   value={address.addressLine}
                   onChange={handleInputChange}
                 />
@@ -241,8 +244,9 @@ export default function CheckoutPage() {
                 <input
                   name="city"
                   placeholder="City"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100 ${errors.city ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-slate-200 dark:border-slate-200'
-                    }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                    errors.city ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                  }`}
                   value={address.city}
                   onChange={handleInputChange}
                 />
@@ -253,8 +257,9 @@ export default function CheckoutPage() {
                 <input
                   name="pincode"
                   placeholder="6-Digit Pincode"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100 ${errors.pincode ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-slate-200 dark:border-slate-200'
-                    }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-100 ${
+                    errors.pincode ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                  }`}
                   value={address.pincode}
                   onChange={handleInputChange}
                   maxLength={6}
@@ -273,10 +278,11 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setPaymentMethod("COD")}
-                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${paymentMethod === 'COD'
+                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
+                  paymentMethod === 'COD'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-50'
                     : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-white'
-                  }`}
+                }`}
               >
                 <FiTruck size={24} className={paymentMethod === 'COD' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
                 <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'COD' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-300'}`}>
@@ -285,10 +291,11 @@ export default function CheckoutPage() {
               </button>
               <button
                 onClick={() => setPaymentMethod("ONLINE")}
-                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${paymentMethod === 'ONLINE'
+                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
+                  paymentMethod === 'ONLINE'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-50'
                     : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-white'
-                  }`}
+                }`}
               >
                 <FiCreditCard size={24} className={paymentMethod === 'ONLINE' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
                 <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'ONLINE' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-300'}`}>
