@@ -196,7 +196,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-12">
           <section id="shipping-section">
             <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-8 text-black dark:text-black bg-black rounded-full flex items-center justify-center text-sm">1</span>
+              <span className="w-8 h-8 bg-black text-white dark:text-black rounded-full flex items-center justify-center text-sm">1</span>
               <span className="text-slate-900 dark:text-slate-900">SHIPPING DETAILS</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
                 className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
                   paymentMethod === 'ONLINE'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-50'
-                    : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-white'
+                    : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-black'
                 }`}
               >
                 <FiCreditCard size={24} className={paymentMethod === 'ONLINE' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
