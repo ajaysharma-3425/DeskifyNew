@@ -309,7 +309,7 @@ export default function CheckoutPage() {
         {/* RIGHT: SUMMARY */}
         <div className="lg:col-span-5">
           <div className="bg-white dark:bg-white p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-100 shadow-xl sticky top-28">
-            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-slate-100">ORDER SUMMARY</h3>
+            <h3 className="font-black mb-6 tracking-tight text-slate-900 dark:text-slate-900">ORDER SUMMARY</h3>
             <div className="space-y-4 mb-8">
               <div className="flex justify-between text-slate-500 dark:text-slate-300 font-bold text-sm">
                 <span>Subtotal</span>
