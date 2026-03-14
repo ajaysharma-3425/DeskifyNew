@@ -91,13 +91,10 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative hidden lg:block">
               <div className="relative z-10 bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-[3rem] border border-white/10 backdrop-blur-sm">
                  <div className="aspect-[4/5] bg-slate-800 rounded-[2rem] overflow-hidden flex items-center justify-center border border-white/5 shadow-2xl">
-                    <Image 
+                    <img 
                       src="/logo.png" 
                       alt="Hero" 
-                      width={400} 
-                      height={400} 
-                      priority
-                      className="opacity-80 brightness-110 object-contain drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                      className="h-[400] w-[400] opacity-80 brightness-110 object-contain drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
                     />
                  </div>
               </div>
