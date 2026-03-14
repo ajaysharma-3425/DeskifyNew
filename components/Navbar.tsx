@@ -47,6 +47,8 @@ function NavbarContent() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  
+
   useEffect(() => {
     if (mobileSearchOpen && mobileInputRef.current) {
       mobileInputRef.current.focus();

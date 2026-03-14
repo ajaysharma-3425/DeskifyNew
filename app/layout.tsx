@@ -6,6 +6,9 @@ import "./globals.css";
 export const metadata = {
   title: "Deskify",
   description: "Workspace Accessories Store",
+  icons: {
+    icon: "/Logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiTrash2, FiPlus, FiMinus, FiShoppingBag, FiArrowRight, FiTruck } from "react-icons/fi";
+import { useCart } from "@/context/CartContext";
 
 interface CartItem {
     product: {
@@ -28,6 +29,8 @@ export default function CartPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [updating, setUpdating] = useState<string | null>(null);
+    const { refreshCart } = useCart();
+
 
     const fetchCart = async () => {
         const token = localStorage.getItem("token");
@@ -54,6 +57,9 @@ export default function CartPage() {
     useEffect(() => {
         fetchCart();
     }, []);
+    useEffect(() => {
+        refreshCart();
+    }, []);
 
     const updateQuantity = async (productId: string, newQuantity: number) => {
         if (newQuantity < 1) return;
@@ -71,6 +77,7 @@ export default function CartPage() {
             });
             const data = await res.json();
             setCart(data.cart);
+            await refreshCart();
         } catch (err) {
             console.error(err);
         } finally {
@@ -93,6 +100,7 @@ export default function CartPage() {
             });
             const data = await res.json();
             setCart(data.cart);
+            await refreshCart();
         } catch (err) {
             console.error(err);
         } finally {
@@ -114,7 +122,7 @@ export default function CartPage() {
                 {/* Header */}
                 <header className="mb-12">
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-                        <FiShoppingBag className="text-emerald-500" /> 
+                        <FiShoppingBag className="text-emerald-500" />
                         Your Bag <span className="text-slate-300">({cart.items.length})</span>
                     </h1>
                 </header>
@@ -198,7 +206,7 @@ export default function CartPage() {
                     <aside className="lg:col-span-4 sticky top-28">
                         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50">
                             <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tight">Order Summary</h2>
-                            
+
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between text-slate-500 font-medium">
                                     <span>Bag Subtotal</span>
@@ -244,7 +252,7 @@ export default function CartPage() {
 function EmptyState() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="w-64 h-64 bg-slate-50 rounded-full flex items-center justify-center mb-10"

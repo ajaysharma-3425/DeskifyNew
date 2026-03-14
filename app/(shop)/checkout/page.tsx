@@ -180,7 +180,11 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (res.ok) { router.push("/my-orders?success=true"); }
+      if (res.ok) {
+        setCart([]); // ⭐ cart empty kar do
+        window.dispatchEvent(new Event("cartUpdated")); // ⭐ navbar/cart count update signal
+        router.push("/my-orders?success=true");
+      }
       else { alert("Order failed"); }
     } catch (err) { alert("Error"); }
     finally { setPlacing(false); setShowModal(false); }
@@ -204,9 +208,8 @@ export default function CheckoutPage() {
                 <input
                   name="fullName"
                   placeholder="Full Name"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.fullName ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
-                  }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${errors.fullName ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    }`}
                   value={address.fullName}
                   onChange={handleInputChange}
                 />
@@ -217,9 +220,8 @@ export default function CheckoutPage() {
                 <input
                   name="phone"
                   placeholder="10-Digit Phone Number"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
-                  }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${errors.phone ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    }`}
                   value={address.phone}
                   onChange={handleInputChange}
                   maxLength={10}
@@ -231,9 +233,8 @@ export default function CheckoutPage() {
                 <input
                   name="addressLine"
                   placeholder="Street Address / House No."
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.addressLine ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
-                  }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${errors.addressLine ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    }`}
                   value={address.addressLine}
                   onChange={handleInputChange}
                 />
@@ -244,9 +245,8 @@ export default function CheckoutPage() {
                 <input
                   name="city"
                   placeholder="City"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.city ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
-                  }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${errors.city ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    }`}
                   value={address.city}
                   onChange={handleInputChange}
                 />
@@ -257,9 +257,8 @@ export default function CheckoutPage() {
                 <input
                   name="pincode"
                   placeholder="6-Digit Pincode"
-                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${
-                    errors.pincode ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
-                  }`}
+                  className={`p-4 border rounded-2xl w-full transition-all outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 dark:text-slate-900 ${errors.pincode ? 'border-rose-500 bg-rose-50 dark:bg-rose-50' : 'border-emerald-400 dark:border-emerald-400'
+                    }`}
                   value={address.pincode}
                   onChange={handleInputChange}
                   maxLength={6}
@@ -278,11 +277,10 @@ export default function CheckoutPage() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setPaymentMethod("COD")}
-                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
-                  paymentMethod === 'COD'
+                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${paymentMethod === 'COD'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-50'
                     : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-white'
-                }`}
+                  }`}
               >
                 <FiTruck size={24} className={paymentMethod === 'COD' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
                 <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'COD' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-300'}`}>
@@ -291,11 +289,10 @@ export default function CheckoutPage() {
               </button>
               <button
                 onClick={() => setPaymentMethod("ONLINE")}
-                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${
-                  paymentMethod === 'ONLINE'
+                className={`p-6 rounded-[2rem] border-2 transition-all flex flex-col gap-2 text-left ${paymentMethod === 'ONLINE'
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-50'
                     : 'border-slate-100 dark:border-slate-100 bg-white dark:bg-white'
-                }`}
+                  }`}
               >
                 <FiCreditCard size={24} className={paymentMethod === 'ONLINE' ? 'text-emerald-500 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-200'} />
                 <span className={`font-black text-xs uppercase tracking-widest ${paymentMethod === 'ONLINE' ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-300'}`}>
