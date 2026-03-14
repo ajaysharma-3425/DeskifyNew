@@ -94,7 +94,7 @@ export default function HomePage() {
                     <img 
                       src="/logo.png" 
                       alt="Hero" 
-                      className="h-[400] w-[400] opacity-80 brightness-110 object-contain drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                      className="h-[400px] w-[400px] opacity-80 brightness-110 object-contain drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
                     />
                  </div>
               </div>
