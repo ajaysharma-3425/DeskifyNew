@@ -96,7 +96,8 @@ export default function HomePage() {
                       alt="Hero" 
                       width={400} 
                       height={400} 
-                      className="opacity-80 brightness-110 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                      priority
+                      className="opacity-80 brightness-110 object-contain drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]"
                     />
                  </div>
               </div>
