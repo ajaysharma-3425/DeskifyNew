@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShield } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,12 +26,6 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    if (!form.email || !form.password) {
-      setError("Please enter both email and password.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -43,148 +38,141 @@ export default function LoginPage() {
       if (res.ok) {
         const payload = JSON.parse(atob(data.token.split(".")[1]));
         login(data.token, payload.role || "user");
-
-        if (payload.role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/");
-        }
+        router.push(payload.role === "admin" ? "/admin/dashboard" : "/");
       } else {
-        setError(data.message || "Invalid credentials. Please try again.");
+        setError(data.message || "Access Denied: Invalid Credentials");
       }
     } catch (err) {
-      setError("Network error. Please check your connection.");
+      setError("Network bypass failed. Check connection.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] px-4 sm:px-6 lg:px-8">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#10B981]/10 to-transparent -z-10" />
-      
-      <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100">
-        {/* Logo & Header */}
-        <div className="text-center">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="relative w-10 h-10">
-              <Image src="/Logo.png" alt="Deskify" fill className="object-contain" />
+    <div className="min-h-screen flex items-center justify-center bg-[#003F3A] px-4 overflow-hidden relative">
+      {/* Dynamic Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#A4F000]/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#A4F000]/5 blur-[120px] rounded-full" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full z-10"
+      >
+        {/* Logo Section */}
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-flex flex-col items-center">
+            <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-4 shadow-2xl backdrop-blur-sm">
+              <Image src="/Logo.png" alt="Deskify" width={40} height={40} className="object-contain" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-[#1F2937]">
-              Des<span className="text-[#10B981]">kify</span>
-            </span>
+            <h1 className="text-3xl font-black tracking-tighter text-white italic uppercase">
+              DESKIFY <span className="text-[#A4F000]">PORTAL</span>
+            </h1>
+            <div className="h-1 w-12 bg-[#A4F000] mt-2 rounded-full" />
           </Link>
-          <h2 className="text-3xl font-extrabold text-[#1F2937]">Welcome back</h2>
-          <p className="mt-2 text-[#6B7280]">
-            Enter your details to access your account
-          </p>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-shake">
-            <p className="text-red-700 text-sm font-medium">{error}</p>
+        <div className="bg-white/[0.03] backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.4)]">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-white tracking-tight">Identity Verification</h2>
+            <p className="text-white/40 text-xs uppercase tracking-[0.2em] mt-1 font-medium">Enter secure credentials to proceed</p>
           </div>
-        )}
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-[#1F2937] mb-1.5">
-                Email Address
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400 group-focus-within:text-[#10B981] transition-colors" />
+          {/* Error Alert */}
+          {error && (
+            <motion.div 
+              initial={{ x: -10 }} animate={{ x: 0 }}
+              className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl mb-6"
+            >
+              <p className="text-rose-400 text-xs font-black uppercase tracking-widest text-center">{error}</p>
+            </motion.div>
+          )}
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {/* Email Field */}
+              <div className="group">
+                <label className="block text-[10px] font-black text-[#A4F000] uppercase tracking-[0.3em] mb-2 ml-1">Terminal ID (Email)</label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#A4F000] transition-colors" />
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 text-white rounded-2xl focus:outline-none focus:border-[#A4F000]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/10 font-bold italic text-sm"
+                    placeholder="operator@deskify.com"
+                  />
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={form.email}
-                  onChange={handleChange}
-                  className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 text-[#1F2937] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 focus:border-[#10B981] focus:bg-white transition-all duration-200 placeholder-gray-400"
-                  placeholder="name@company.com"
-                />
+              </div>
+
+              {/* Password Field */}
+              <div className="group">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-[10px] font-black text-[#A4F000] uppercase tracking-[0.3em] ml-1">Access Key</label>
+                  <Link href="/forgot-password"  className="text-[10px] font-black text-white/20 hover:text-[#A4F000] uppercase transition-colors">Recovery?</Link>
+                </div>
+                <div className="relative">
+                  <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#A4F000] transition-colors" />
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={form.password}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 text-white rounded-2xl focus:outline-none focus:border-[#A4F000]/50 focus:bg-white/[0.08] transition-all placeholder:text-white/10 font-bold text-sm tracking-widest"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Password Field */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-semibold text-[#1F2937]">
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-bold text-[#10B981] hover:text-[#065F46] transition"
-                >
-                  Forgot password?
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-5 bg-[#A4F000] text-[#003F3A] rounded-2xl font-black text-xs uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl shadow-[#A4F000]/10 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 mt-8"
+            >
+              {loading ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 border-2 border-[#003F3A]/30 border-t-[#003F3A] rounded-full animate-spin" />
+                  <span>Authorizing...</span>
+                </div>
+              ) : (
+                <>
+                  <span>Initialize Login</span>
+                  <FiArrowRight />
+                </>
+              )}
+            </button>
+
+            {/* Sign Up Footer */}
+            <div className="pt-6 text-center">
+              <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">
+                Unauthorized access is restricted.{" "}
+                <Link href="/signup" className="text-[#A4F000] hover:text-white transition-colors underline underline-offset-4 decoration-[#A4F000]/30">
+                  Register Node
                 </Link>
-              </div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400 group-focus-within:text-[#10B981] transition-colors" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  value={form.password}
-                  onChange={handleChange}
-                  className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 text-[#1F2937] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 focus:border-[#10B981] focus:bg-white transition-all duration-200 placeholder-gray-400"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-[#1F2937] transition-colors"
-                >
-                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                </button>
-              </div>
+              </p>
             </div>
-          </div>
+          </form>
+        </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-[#10B981] hover:bg-[#065F46] focus:outline-none focus:ring-4 focus:ring-[#10B981]/30 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#10B981]/20"
-          >
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Authenticating...</span>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <span>Sign in to Account</span>
-                <FiArrowRight className="ml-2 h-4 w-4" />
-              </div>
-            )}
-          </button>
-
-          {/* Sign Up Footer */}
-          <div className="pt-4 text-center">
-            <p className="text-sm text-[#6B7280]">
-              New to Deskify?{" "}
-              <Link href="/signup" className="font-bold text-[#10B981] hover:underline decoration-2 underline-offset-4">
-                Create an account
-              </Link>
-            </p>
-          </div>
-        </form>
-      </div>
+        {/* Security Footer */}
+        <div className="mt-10 flex items-center justify-center gap-2 text-white/10">
+          <FiShield size={14} />
+          <span className="text-[9px] font-black uppercase tracking-[0.4em]">Encrypted Session Secure</span>
+        </div>
+      </motion.div>
     </div>
   );
 }

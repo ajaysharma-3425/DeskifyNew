@@ -14,34 +14,25 @@ interface Product {
   category?: string;
 }
 
-// --- 1. Main logic component wrap in Suspense ---
 function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- Filter States ---
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [maxPrice, setMaxPrice] = useState<number>(500000);
-  // --- WHITELIST STATE ---
   const [whitelistIds, setWhitelistIds] = useState<string[]>([]);
 
-  // Load whitelist from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("whitelist");
-    if (saved) {
-      setWhitelistIds(JSON.parse(saved));
-    }
+    if (saved) setWhitelistIds(JSON.parse(saved));
   }, []);
 
   const toggleWhitelist = (id: string) => {
-    let updated;
-    if (whitelistIds.includes(id)) {
-      updated = whitelistIds.filter((item) => item !== id);
-    } else {
-      updated = [...whitelistIds, id];
-    }
+    let updated = whitelistIds.includes(id)
+      ? whitelistIds.filter((item) => item !== id)
+      : [...whitelistIds, id];
     setWhitelistIds(updated);
     localStorage.setItem("whitelist", JSON.stringify(updated));
   };
@@ -49,9 +40,7 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   useEffect(() => {
     const query = searchParams.get("search");
-    if (query) {
-      setSearchQuery(query);
-    }
+    if (query) setSearchQuery(query);
   }, [searchParams]);
 
   const fetchProducts = async () => {
@@ -59,25 +48,21 @@ function ProductsContent() {
       setLoading(true);
       setError(null);
       const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Failed to fetch products");
+      if (!res.ok) throw new Error("System Link Failure: Data not found");
       const data = await res.json();
       const fetchedProducts = data.products || [];
       setProducts(fetchedProducts);
-
       if (fetchedProducts.length > 0) {
-        const highestPrice = Math.max(...fetchedProducts.map((p: Product) => p.price));
-        setMaxPrice(highestPrice);
+        setMaxPrice(Math.max(...fetchedProducts.map((p: Product) => p.price)));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Protocol Error");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
   const categories = useMemo(() => {
     const uniqueCats = Array.from(new Set(products.map((p) => p.category || "General")));
@@ -92,58 +77,59 @@ function ProductsContent() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] pb-20">
+    <div className="min-h-screen bg-[#003F3A] pb-20 selection:bg-[#A4F000] selection:text-[#003F3A]">
+      
       {/* --- HEADER SECTION --- */}
-      <div className="bg-[#0F172A] pt-32 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-[#003632] pt-32 pb-24 px-6 border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#A4F000]/5 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+            className="flex flex-col md:flex-row md:items-end justify-between gap-8"
           >
-            <div>
-              <nav className="flex items-center gap-2 text-emerald-400 text-sm font-bold uppercase tracking-widest mb-4">
-                <Link href="/">Home</Link>
-                <FiChevronRight />
-                <span className="text-slate-400">Store</span>
+            <div className="space-y-4">
+              <nav className="flex items-center gap-2 text-[#A4F000] text-[10px] font-black uppercase tracking-[0.3em]">
+                <Link href="/" className="hover:opacity-60 transition-opacity">Main</Link>
+                <FiChevronRight className="opacity-40" />
+                <span className="text-white/40">Inventory</span>
               </nav>
-              <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-                PREMIUM <span className="text-emerald-500 italic">COLLECTION</span>
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic">
+                THE <span className="text-[#A4F000]">ARCHIVE</span>
               </h1>
             </div>
 
-            <div className="relative w-full md:w-96">
+            <div className="relative w-full md:w-[450px] group">
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Locate protocol / product..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-[1.5rem] py-5 px-8 text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#A4F000]/50 transition-all backdrop-blur-xl"
               />
-              <FiSearch className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
+              <FiSearch className="absolute right-6 top-1/2 -translate-y-1/2 text-[#A4F000] size-6 group-focus-within:animate-pulse" />
             </div>
           </motion.div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-10">
+      <div className="max-w-7xl mx-auto px-6 -mt-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+          
           {/* --- SIDEBAR FILTERS --- */}
-          <aside className="space-y-8 bg-white p-6 sm:p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-fit lg:sticky lg:top-24">
+          <aside className="space-y-8 bg-[#004d47] p-8 rounded-[3rem] border border-white/5 h-fit lg:sticky lg:top-24 shadow-2xl">
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-slate-900 font-black flex items-center gap-2">
-                  <FiFilter className="text-emerald-500" /> FILTERS
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-white font-black text-sm tracking-widest flex items-center gap-3">
+                  <FiFilter className="text-[#A4F000]" /> FILTERS
                 </h3>
                 {(selectedCategory !== "All" || searchQuery !== "") && (
                   <button
-                    onClick={() => {
-                      setSelectedCategory("All");
-                      setSearchQuery("");
-                    }}
-                    className="text-[10px] font-bold text-emerald-600 hover:underline underline-offset-4"
+                    onClick={() => { setSelectedCategory("All"); setSearchQuery(""); }}
+                    className="text-[10px] font-black text-[#A4F000] hover:text-white transition-colors tracking-tighter"
                   >
-                    RESET
+                    RESET SYSTEM
                   </button>
                 )}
               </div>
@@ -160,14 +146,14 @@ function ProductsContent() {
               </div>
             </div>
 
-            <hr className="border-slate-100" />
+            <hr className="border-white/5" />
 
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-slate-900 font-black uppercase text-xs tracking-widest text-slate-400">
-                  Price Range
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-white/40 font-black uppercase text-[10px] tracking-widest">
+                  Price Limit
                 </h3>
-                <span className="text-xs font-black text-emerald-600">
+                <span className="text-sm font-black text-[#A4F000]">
                   ₹{maxPrice.toLocaleString("en-IN")}
                 </span>
               </div>
@@ -177,30 +163,24 @@ function ProductsContent() {
                 max={products.length > 0 ? Math.max(...products.map((p) => p.price)) : 100000}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-emerald-500 cursor-pointer"
+                className="w-full h-1.5 bg-[#003F3A] rounded-lg appearance-none cursor-pointer accent-[#A4F000]"
               />
-              <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-2">
-                <span>₹0</span>
-                <span>MAX</span>
+              <div className="flex justify-between text-[10px] font-black text-white/20 mt-4 tracking-widest">
+                <span>0.00</span>
+                <span>MAX_CAP</span>
               </div>
             </div>
           </aside>
 
           {/* --- MAIN CONTENT --- */}
           <main className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-8 text-slate-500 font-medium px-2">
-              <p className="text-sm">
-                Showing <span className="text-slate-900 font-bold">{filteredProducts.length}</span> results
-                {selectedCategory !== "All" && (
-                  <span>
-                    {" "}
-                    in <span className="text-emerald-600">{selectedCategory}</span>
-                  </span>
-                )}
+            <div className="flex items-center justify-between mb-10 text-white/40 px-4">
+              <p className="text-xs font-black uppercase tracking-widest">
+                Nodes Found: <span className="text-[#A4F000]">{filteredProducts.length}</span>
               </p>
-              <div className="flex items-center gap-4 text-slate-400">
-                <FiGrid className="text-emerald-500 cursor-pointer size-5" />
-                <FiList className="hover:text-slate-900 cursor-pointer size-5 transition-colors" />
+              <div className="flex items-center gap-4">
+                <FiGrid className="text-[#A4F000] cursor-pointer size-5" />
+                <FiList className="hover:text-white cursor-pointer size-5 transition-colors" />
               </div>
             </div>
 
@@ -225,19 +205,16 @@ function ProductsContent() {
             )}
 
             {!loading && filteredProducts.length === 0 && (
-              <div className="text-center py-40 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
-                <FiSearch className="mx-auto size-12 text-slate-200 mb-4" />
-                <p className="text-slate-400 font-bold text-xl italic">
-                  "No items match your specific filters"
+              <div className="text-center py-40 bg-white/5 rounded-[4rem] border border-dashed border-white/10">
+                <FiSearch className="mx-auto size-16 text-[#A4F000]/20 mb-6" />
+                <p className="text-white/30 font-black text-2xl uppercase italic tracking-tighter">
+                  "No Data in Current Filter"
                 </p>
                 <button
-                  onClick={() => {
-                    setSelectedCategory("All");
-                    setSearchQuery("");
-                  }}
-                  className="mt-4 text-emerald-500 font-bold hover:underline"
+                  onClick={() => { setSelectedCategory("All"); setSearchQuery(""); }}
+                  className="mt-6 text-[#A4F000] font-black text-xs uppercase tracking-widest border-b border-[#A4F000]/30 hover:border-[#A4F000] pb-1 transition-all"
                 >
-                  Clear all filters
+                  Override all filters
                 </button>
               </div>
             )}
@@ -248,28 +225,17 @@ function ProductsContent() {
   );
 }
 
-// --- 2. Final Export with Suspense ---
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<LoadingGrid />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#003F3A]" />}>
       <ProductsContent />
     </Suspense>
   );
 }
 
-/* --- SUB-COMPONENTS --- */
+/* --- REUSABLE COMPONENTS --- */
 
-function ProductCard({
-  product,
-  index,
-  isWhitelisted,
-  onToggle,
-}: {
-  product: Product;
-  index: number;
-  isWhitelisted: boolean;
-  onToggle: () => void;
-}) {
+function ProductCard({ product, isWhitelisted, onToggle }: any) {
   const getDiscount = (id: string, category: string) => {
     const lastDigit = id.slice(-1).charCodeAt(0);
     if (category === "Electronics") return 15 + (lastDigit % 11);
@@ -283,71 +249,57 @@ function ProductCard({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -10 }}
-      className="group bg-white rounded-[2.5rem] border border-slate-100 p-3 hover:shadow-2xl hover:shadow-slate-200/60 transition-all duration-500"
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="group bg-[#004d47] rounded-[3rem] border border-white/5 p-3 hover:border-[#A4F000]/50 transition-all duration-500 shadow-xl"
     >
       <Link href={`/product/${product._id}`}>
-        <div className="relative aspect-square rounded-[2rem] overflow-hidden bg-slate-50 mb-6">
+        <div className="relative aspect-square rounded-[2.5rem] overflow-hidden bg-[#003F3A] mb-6">
           <img
             src={product.image || "/placeholder.jpg"}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80 group-hover:opacity-100"
           />
 
           <div className="absolute top-0 left-0">
-            <div className="bg-rose-600 text-white text-[10px] font-black px-4 py-2 rounded-br-[1.5rem] shadow-lg flex flex-col items-center">
+            <div className="bg-[#A4F000] text-[#003F3A] text-[10px] font-black px-4 py-2 rounded-br-[1.5rem] shadow-lg flex flex-col items-center">
               <span className="leading-none">{discountPercent}%</span>
-              <span className="text-[7px] uppercase tracking-tighter opacity-80">OFF</span>
+              <span className="text-[7px] uppercase tracking-tighter opacity-70">DISC</span>
             </div>
           </div>
 
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              onToggle();
-            }}
-            className={`absolute top-2 right-3 backdrop-blur-md p-3 rounded-2xl shadow-lg 
-    transition-all transform
-    /* Mobile: Hamesha dikhega (opacity-100) | Desktop (md): Sirf hover par dikhega */
-    opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0
-    ${isWhitelisted
-                ? "bg-rose-500 text-white opacity-100"
-                : "bg-white/90 text-slate-400 hover:text-rose-500"
-              }
-`}
+            onClick={(e) => { e.preventDefault(); onToggle(); }}
+            className={`absolute top-3 right-3 backdrop-blur-xl p-4 rounded-2xl shadow-2xl transition-all transform md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0
+              ${isWhitelisted ? "bg-[#A4F000] text-[#003F3A]" : "bg-white/10 text-white hover:bg-[#A4F000] hover:text-[#003F3A]"}
+            `}
           >
-            <FiHeart fill={isWhitelisted ? "white" : "none"} className="size-5" />
+            <FiHeart fill={isWhitelisted ? "currentColor" : "none"} className="size-5" />
           </button>
         </div>
       </Link>
 
-      <div className="px-4 pb-4">
-        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">
+      <div className="px-5 pb-5">
+        <p className="text-[9px] font-black text-[#A4F000] uppercase tracking-[0.2em] mb-2">
           {product.category || "General"}
         </p>
         <Link href={`/product/${product._id}`}>
-          <h2 className="text-lg font-bold text-slate-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <h2 className="text-xl font-bold text-white line-clamp-1 group-hover:text-[#A4F000] transition-colors uppercase italic tracking-tight">
             {product.name}
           </h2>
         </Link>
-        <div className="flex items-end justify-between mt-4">
+        <div className="flex items-end justify-between mt-6">
           <div>
-            <p className="text-[10px] font-bold text-slate-400 line-through">
+            <p className="text-[10px] font-black text-white/20 line-through">
               ₹{mrp.toLocaleString("en-IN")}
             </p>
-            <p className="text-2xl font-black text-slate-900 tracking-tighter">
+            <p className="text-3xl font-black text-[#A4F000] tracking-tighter italic leading-none">
               ₹{product.price.toLocaleString("en-IN")}
             </p>
           </div>
-          <Link
-            href={`/product/${product._id}`}
-            className="text-xs font-black uppercase text-slate-400 group-hover:text-emerald-500 transition-colors mb-1"
-          >
-            Details +
+          <Link href={`/product/${product._id}`} className="size-12 bg-white/5 hover:bg-[#A4F000] text-white hover:text-[#003F3A] rounded-2xl flex items-center justify-center transition-all shadow-inner">
+            <FiChevronRight size={20} />
           </Link>
         </div>
       </div>
@@ -355,27 +307,17 @@ function ProductCard({
   );
 }
 
-function FilterOption({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function FilterOption({ label, active, onClick }: any) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center justify-between py-2.5 px-4 rounded-xl cursor-pointer transition-all duration-300 ${active
-          ? "bg-emerald-50 text-emerald-600 font-bold translate-x-2"
-          : "text-slate-500 hover:bg-slate-50 hover:translate-x-1"
+      className={`flex items-center justify-between py-3.5 px-6 rounded-2xl cursor-pointer transition-all duration-300 ${active
+          ? "bg-[#A4F000] text-[#003F3A] font-black scale-[1.02]"
+          : "text-white/40 hover:bg-white/5 hover:text-white"
         }`}
     >
-      <span className="text-sm tracking-tight capitalize">{label}</span>
-      {active && (
-        <motion.div layoutId="activeDot" className="size-1.5 bg-emerald-500 rounded-full" />
-      )}
+      <span className="text-[11px] font-black uppercase tracking-widest">{label}</span>
+      {active && <div className="size-2 bg-[#003F3A] rounded-full animate-pulse" />}
     </div>
   );
 }
@@ -384,12 +326,12 @@ function LoadingGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="bg-white rounded-[2.5rem] p-4 border border-slate-100 animate-pulse">
-          <div className="aspect-square bg-slate-100 rounded-[2rem] mb-6" />
-          <div className="space-y-3 px-2">
-            <div className="h-4 bg-slate-100 rounded w-1/4" />
-            <div className="h-6 bg-slate-100 rounded w-3/4" />
-            <div className="h-8 bg-slate-100 rounded w-1/2" />
+        <div key={i} className="bg-[#004d47] rounded-[3rem] p-4 border border-white/5 animate-pulse">
+          <div className="aspect-square bg-[#003F3A] rounded-[2.5rem] mb-6" />
+          <div className="space-y-4 px-2">
+            <div className="h-3 bg-[#003F3A] rounded w-1/4" />
+            <div className="h-6 bg-[#003F3A] rounded w-3/4" />
+            <div className="h-10 bg-[#003F3A] rounded w-1/2" />
           </div>
         </div>
       ))}
@@ -397,15 +339,15 @@ function LoadingGrid() {
   );
 }
 
-function ErrorState({ error, retry }: { error: string; retry: () => void }) {
+function ErrorState({ error, retry }: any) {
   return (
-    <div className="text-center py-32 bg-rose-50 rounded-[3rem] border-2 border-dashed border-rose-100">
-      <p className="text-rose-500 font-bold mb-6 italic text-lg">“{error}”</p>
+    <div className="text-center py-32 bg-[#A4F000]/5 rounded-[4rem] border border-dashed border-[#A4F000]/20">
+      <p className="text-[#A4F000] font-black mb-8 italic text-xl uppercase tracking-tighter">“{error}”</p>
       <button
         onClick={retry}
-        className="flex items-center gap-2 mx-auto px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black transition-all"
+        className="flex items-center gap-3 mx-auto px-10 py-5 bg-[#A4F000] text-[#003F3A] rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 transition-all shadow-2xl"
       >
-        <FiRefreshCw /> Re-initiate Protocol
+        <FiRefreshCw className="animate-spin-slow" /> Re-Link System
       </button>
     </div>
   );
