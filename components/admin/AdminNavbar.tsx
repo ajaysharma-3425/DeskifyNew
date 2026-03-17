@@ -22,10 +22,9 @@ import {
   FiMessageSquare,
   FiHelpCircle,
   FiLogOut,
-  FiMoreVertical,
 } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
-import ThemeToggle from '../ui/ThemeToggle'; // ⚠️ This component still needs conversion separately
+import ThemeToggle from '../ui/ThemeToggle';
 
 const menuItems = [
   {
@@ -97,7 +96,7 @@ export default function AdminNavbar({
   });
 
   const toggleMenu = (menuName: string) => {
-    setOpenMenus(prev => ({ ...prev, [menuName]: !prev[menuName] }));
+    setOpenMenus((prev) => ({ ...prev, [menuName]: !prev[menuName] }));
   };
 
   useEffect(() => {
@@ -117,339 +116,207 @@ export default function AdminNavbar({
 
   const isActive = (href: string) => pathname === href;
 
+  // Reusable Nav Link Component for both Sidebars
+  const NavItem = ({ item, isMobile = false }: { item: any; isMobile?: boolean }) => {
+    const hasSubItems = item.subItems && item.subItems.length > 0;
+    const isOpen = openMenus[item.name];
+    const active = isActive(item.href || '');
+    const showLabels = isMobile || !effectiveCollapsed;
+
+    return (
+      <li key={item.name} className="list-none">
+        {hasSubItems ? (
+          <div>
+            <button
+              onClick={() => toggleMenu(item.name)}
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                isOpen ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center">
+                <item.icon size={20} />
+                {showLabels && <span className="ml-3 text-sm font-medium">{item.name}</span>}
+              </div>
+              {showLabels && (isOpen ? <FiChevronDown size={14} /> : <FiChevronRight size={14} />)}
+            </button>
+            {showLabels && isOpen && (
+              <ul className="ml-9 mt-1 space-y-1">
+                {item.subItems.map((sub: any) => (
+                  <li key={sub.name}>
+                    <Link
+                      href={sub.href}
+                      onClick={() => isMobile && setMobileSidebarOpen(false)}
+                      className={`block p-2 text-sm rounded-lg transition-colors ${
+                        isActive(sub.href) ? 'text-white font-semibold bg-white/5' : 'text-gray-500 hover:text-white'
+                      }`}
+                    >
+                      {sub.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <Link
+            href={item.href!}
+            onClick={() => isMobile && setMobileSidebarOpen(false)}
+            className={`flex items-center p-3 rounded-xl transition-all ${
+              active ? 'bg-white text-[#2F2F33] shadow-lg font-bold' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <item.icon size={20} />
+            {showLabels && <span className="ml-3 text-sm font-medium">{item.name}</span>}
+          </Link>
+        )}
+      </li>
+    );
+  };
+
   return (
     <>
-      {/* Top Navbar – Slate Dark (#111827) */}
+      {/* --- TOP NAVBAR --- */}
       <nav
-        className={`sticky top-0 z-40 bg-[#111827] border-b border-[#334155] px-4 sm:px-6 lg:px-8 py-3 transition-all duration-300 ${effectiveCollapsed ? 'lg:ml-20' : 'lg:ml-64'
-          }`}
+        className={`sticky top-0 z-40 bg-[#F5F6F7] border-b border-gray-200 px-4 sm:px-8 py-3 transition-all duration-300 ${
+          effectiveCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        }`}
       >
         <div className="flex items-center justify-between">
-          {/* Left section */}
           <div className="flex items-center flex-1">
-            {/* Desktop hamburger */}
+            {/* Toggle Buttons */}
             <button
               onClick={() => onCollapse(!collapsed)}
-              className="hidden lg:block p-2 mr-2 text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white rounded-md transition-colors"
-              aria-label="Toggle sidebar"
+              className="hidden lg:flex p-2 mr-4 text-[#2F2F33] hover:bg-white rounded-lg border border-transparent hover:border-gray-200 transition-all shadow-sm"
             >
-              <FiMenu size={24} />
+              <FiMenu size={22} />
             </button>
-            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="lg:hidden p-2 mr-2 text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white rounded-md transition-colors"
+              className="lg:hidden p-2 mr-4 text-[#2F2F33] hover:bg-white rounded-lg transition-all"
             >
-              <FiMenu size={24} />
+              <FiMenu size={22} />
             </button>
 
-            {/* Search input */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" size={18} />
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md hidden md:block">
+              <div className="relative group">
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2F2F33]" size={18} />
                 <input
                   type="text"
-                  placeholder="Search or type command..."
-                  className="w-full pl-10 pr-4 py-2 border border-[#334155] rounded-lg bg-[#0F172A] text-[#F9FAFB] placeholder-[#9CA3AF] focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent transition"
+                  placeholder="Quick search..."
+                  className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-[#2F2F33] focus:outline-none focus:ring-2 focus:ring-[#2F2F33]/5 transition-all"
                 />
               </div>
             </div>
           </div>
 
-          {/* Right icons */}
-          <div className="flex items-center space-x-3">
-            <ThemeToggle /> {/* ⚠️ Needs separate conversion */}
-            <button className="p-2 rounded-full text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white transition-colors relative">
+          {/* Right Action Icons */}
+          <div className="flex items-center space-x-3 sm:space-x-5">
+            <ThemeToggle />
+            <button className="p-2 rounded-lg text-[#2F2F33] hover:bg-white border border-transparent hover:border-gray-200 transition-all relative">
               <FiBell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#3B82F6] rounded-full"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#F5F6F7]"></span>
             </button>
+
+            {/* Profile Menu */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center space-x-2 p-1 rounded-full text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white transition-colors"
+                className="flex items-center space-x-3 p-1 pr-3 rounded-full bg-white border border-gray-200 hover:shadow-md transition-all"
               >
-                <div className="w-8 h-8 bg-[#334155] rounded-full flex items-center justify-center">
-                  <FiUser className="text-[#F9FAFB]" size={18} />
+                <div className="w-8 h-8 bg-[#2F2F33] rounded-full flex items-center justify-center text-white font-bold text-xs">
+                  AD
                 </div>
-                <FiChevronDown className={`transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                <FiChevronDown className={`text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
+
               <div
-                className={`absolute right-0 mt-2 w-48 bg-[#111827] rounded-lg shadow-lg border border-[#334155] py-2 z-50 transform transition-all duration-200 ease-out origin-top-right
-            ${profileOpen
-                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                  }`}
+                className={`absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 transition-all duration-200 origin-top-right ${
+                  profileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                }`}
               >
-                <Link
-                  href="/admin/profile"
-                  className="block px-4 py-2 text-sm text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white"
-                >
-                  Edit Profile
-                </Link>
-                <Link
-                  href="/admin/settings"
-                  className="block px-4 py-2 text-sm text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white"
-                >
-                  Account Settings
-                </Link>
-                <Link
-                  href="/support"
-                  className="block px-4 py-2 text-sm text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white"
-                >
-                  Support
-                </Link>
-                <div className="border-t border-[#334155] my-2"></div>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm border border-[#3B82F6] text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white transition-colors"
-                // removed mx-2, using px-4 py-2 for consistent padding
-                >
-                  Sign Out
+                <div className="px-4 py-3 border-b border-gray-50 mb-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Admin Panel</p>
+                  <p className="text-sm font-semibold text-[#2F2F33]">Deskify Manager</p>
+                </div>
+                <Link href="/admin/profile" className="flex items-center px-4 py-2.5 text-sm text-[#2F2F33] hover:bg-[#F5F6F7] transition-colors"><FiUser className="mr-3" /> Profile</Link>
+                <Link href="/admin/settings" className="flex items-center px-4 py-2.5 text-sm text-[#2F2F33] hover:bg-[#F5F6F7] transition-colors"><FiGrid className="mr-3" /> Settings</Link>
+                <div className="border-t border-gray-50 my-2"></div>
+                <button onClick={handleLogout} className="w-full flex items-center px-4 py-2.5 text-sm text-rose-600 font-bold hover:bg-rose-50 transition-colors">
+                  <FiLogOut className="mr-3" /> Sign Out
                 </button>
-                
               </div>
             </div>
-              
-
           </div>
         </div>
       </nav>
 
-      {/* Sidebar (desktop) – Darker Slate (#111827) */}
+      {/* --- DESKTOP SIDEBAR --- */}
       <aside
-        className={`fixed left-0 top-0 h-full bg-[#111827] border-r border-[#334155] transition-all duration-300 z-30 hidden lg:block ${effectiveCollapsed ? 'w-20' : 'w-64'
-          }`}
+        className={`fixed left-0 top-0 h-full bg-[#2F2F33] transition-all duration-300 z-30 hidden lg:block ${
+          effectiveCollapsed ? 'w-20' : 'w-64'
+        }`}
         onMouseEnter={() => onHoverSidebar(true)}
         onMouseLeave={() => onHoverSidebar(false)}
       >
-        <div className="flex flex-col h-full relative">
-          {/* Hover handle */}
-          <div className="absolute right-0 top-0 w-2 h-full cursor-ew-resize hover:bg-[#60A5FA]/50" />
-
-          {/* Logo area */}
-          {/* Logo area */}
-          <div className="flex items-center justify-between p-4">
-            <div
-              className="flex items-center space-x-2 p-1 rounded cursor-pointer transition-colors"
-              onMouseEnter={() => onHoverSidebar(true)}
-              onMouseLeave={() => onHoverSidebar(false)}
-              onClick={() => onCollapse(!collapsed)}
-            >
-              <img src="/apple.png" alt="Logo" className="h-8 w-auto mr-10 hover:shadow-green-500" />
+        <div className="flex flex-col h-full">
+          {/* Logo Area */}
+          <div className="h-20 flex items-center px-6">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onCollapse(!collapsed)}>
+              <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-lg shadow-black/20">
+                <img src="/apple.png" alt="Logo" className="w-full h-full object-contain" />
+              </div>
               {!effectiveCollapsed && (
-                <span className="text-lg font-bold">
-                  <span className="text-[#3B82F6] font-bold text-2xl">Des</span>
-                  <span className="text-[#F9FAFB] font-bold text-2xl">Kify</span>
+                <span className="text-2xl font-black text-white tracking-tighter">
+                  Des<span className="text-gray-400">Kify</span>
                 </span>
               )}
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4">
-            <ul className="space-y-2">
-              {menuItems.map((item) => {
-                const hasSubItems = item.subItems && item.subItems.length > 0;
-                const isOpen = openMenus[item.name];
-
-                return (
-                  <li key={item.name}>
-                    {hasSubItems ? (
-                      // Button with submenu
-                      <button
-                        onClick={() => toggleMenu(item.name)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${isOpen
-                          ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                          : 'text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white'
-                          }`}
-                      >
-                        <div className="flex items-center">
-                          <item.icon
-                            size={20}
-                            className={isOpen ? 'text-[#3B82F6]' : ''}
-                          />
-                          {!effectiveCollapsed && (
-                            <span className="ml-3 text-sm font-medium">{item.name}</span>
-                          )}
-                        </div>
-                        {!effectiveCollapsed &&
-                          (isOpen ? <FiChevronDown size={16} /> : <FiChevronRight size={16} />)}
-                      </button>
-                    ) : (
-                      // Direct link
-                      <Link
-                        href={item.href!}
-                        className={`flex items-center p-3 rounded-lg transition-colors ${isActive(item.href!)
-                          ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                          : 'text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white'
-                          }`}
-                      >
-                        <item.icon
-                          size={20}
-                          className={isActive(item.href!) ? 'text-[#3B82F6]' : ''}
-                        />
-                        {!effectiveCollapsed && <span className="ml-3 text-sm font-medium">{item.name}</span>}
-                      </Link>
-                    )}
-
-                    {/* Submenu items */}
-                    {!effectiveCollapsed && hasSubItems && isOpen && (
-                      <ul
-                        className={`ml-8 mt-1 space-y-1 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                          }`}
-                      >
-                        {item.subItems.map((subItem) => (
-                          <li key={subItem.name}>
-                            <Link
-                              href={subItem.href}
-                              className={`flex items-center p-2 rounded-lg transition-colors ${isActive(subItem.href)
-                                ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                                : 'text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white'
-                                }`}
-                            >
-                              <span className="text-sm">{subItem.name}</span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+          {/* Nav Links */}
+          <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 custom-scrollbar">
+            {menuItems.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
           </nav>
 
-          {/* Footer support links */}
-          <div className="p-4 border-t border-[#334155]">
-            {!effectiveCollapsed ? (
-              <div className="space-y-2">
-                <Link
-                  href="/support"
-                  className="flex items-center text-sm text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white p-2 rounded-lg transition-colors"
-                >
-                  <FiHelpCircle size={16} className="mr-2" />
-                  Support
-                </Link>
-                <Link
-                  href="/chat"
-                  className="flex items-center text-sm text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white p-2 rounded-lg transition-colors"
-                >
-                  <FiMessageSquare size={16} className="mr-2" />
-                  Chat
-                </Link>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center space-y-3">
-                <Link href="/support" title="Support">
-                  <FiHelpCircle size={20} className="text-[#9CA3AF] hover:text-[#60A5FA] transition-colors" />
-                </Link>
-                <Link href="/chat" title="Chat">
-                  <FiMessageSquare size={20} className="text-[#9CA3AF] hover:text-[#60A5FA] transition-colors" />
-                </Link>
-              </div>
-            )}
+          {/* Footer Support */}
+          <div className="p-4 border-t border-white/5 bg-black/10">
+            <Link href="/support" className="flex items-center space-x-3 p-3 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+              <FiHelpCircle size={20} />
+              {!effectiveCollapsed && <span className="text-sm font-medium">Help & Support</span>}
+            </Link>
           </div>
         </div>
       </aside>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* --- MOBILE SIDEBAR & OVERLAY --- */}
       {mobileSidebarOpen && (
         <>
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
-          <div className="fixed top-0 left-0 w-64 h-full bg-[#111827] z-50 shadow-xl transform transition-transform duration-300 lg:hidden">
-            <div className="p-4 border-b border-[#334155] flex justify-between items-center">
-              <span className="text-xl font-bold text-[#F9FAFB]">DesKify</span>
-              <button
-                onClick={() => setMobileSidebarOpen(false)}
-                className="p-1 rounded text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white transition-colors"
-              >
-                <FiX size={20} />
+          <div 
+            className="fixed inset-0 bg-[#2F2F33]/60 backdrop-blur-md z-[60] lg:hidden transition-opacity"
+            onClick={() => setMobileSidebarOpen(false)} 
+          />
+          <div className="fixed top-0 left-0 w-80 h-full bg-[#2F2F33] z-[70] shadow-2xl lg:hidden flex flex-col transform transition-transform duration-300 ease-in-out">
+            <div className="p-6 flex justify-between items-center border-b border-white/5 bg-black/10">
+              <div className="flex items-center space-x-3">
+                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1"><img src="/apple.png" alt="L" /></div>
+                 <span className="text-xl font-black text-white tracking-tight">DesKify</span>
+              </div>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-2 text-gray-400 hover:text-white">
+                <FiX size={24} />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto p-4">
-              <ul className="space-y-2">
-                {menuItems.map((item) => {
-                  const hasSubItems = item.subItems && item.subItems.length > 0;
-                  const isOpen = openMenus[item.name];
-
-                  return (
-                    <li key={item.name}>
-                      {hasSubItems ? (
-                        <button
-                          onClick={() => toggleMenu(item.name)}
-                          className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${isOpen
-                            ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                            : 'text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white'
-                            }`}
-                        >
-                          <div className="flex items-center">
-                            <item.icon
-                              size={20}
-                              className={isOpen ? 'text-[#3B82F6]' : ''}
-                            />
-                            <span className="ml-3 text-sm font-medium">{item.name}</span>
-                          </div>
-                          {isOpen ? <FiChevronDown size={16} /> : <FiChevronRight size={16} />}
-                        </button>
-                      ) : (
-                        <Link
-                          href={item.href!}
-                          onClick={() => setMobileSidebarOpen(false)} // ✅ close sidebar on click
-                          className={`flex items-center p-3 rounded-lg transition-colors ${isActive(item.href!)
-                            ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                            : 'text-[#F9FAFB] hover:bg-[#60A5FA] hover:text-white'
-                            }`}
-                        >
-                          <item.icon
-                            size={20}
-                            className={isActive(item.href!) ? 'text-[#3B82F6]' : ''}
-                          />
-                          <span className="ml-3 text-sm font-medium">{item.name}</span>
-                        </Link>
-                      )}
-
-                      {hasSubItems && isOpen && (
-                        <ul className="ml-8 mt-1 space-y-1">
-                          {item.subItems.map((subItem) => (
-                            <li key={subItem.name}>
-                              <Link
-                                href={subItem.href}
-                                onClick={() => setMobileSidebarOpen(false)} // ✅ close sidebar on click
-                                className={`flex items-center p-2 rounded-lg transition-colors ${isActive(subItem.href)
-                                  ? 'bg-[rgba(59,130,246,0.15)] text-[#3B82F6]'
-                                  : 'text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white'
-                                  }`}
-                              >
-                                <span className="text-sm">{subItem.name}</span>
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  );
-                })}
-                <li className="pt-4 border-t border-[#334155]">
-                  <Link
-                    href="/support"
-                    onClick={() => setMobileSidebarOpen(false)} // ✅ close sidebar on click
-                    className="flex items-center p-2 text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white rounded-lg transition-colors"
-                  >
-                    <FiHelpCircle size={18} className="mr-2" />
-                    <span className="text-sm">Support</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/chat"
-                    onClick={() => setMobileSidebarOpen(false)} // ✅ close sidebar on click
-                    className="flex items-center p-2 text-[#9CA3AF] hover:bg-[#60A5FA] hover:text-white rounded-lg transition-colors"
-                  >
-                    <FiMessageSquare size={18} className="mr-2" />
-                    <span className="text-sm">Chat</span>
-                  </Link>
-                </li>
-              </ul>
+            
+            <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+              {menuItems.map((item) => (
+                <NavItem key={item.name} item={item} isMobile={true} />
+              ))}
+              <div className="border-t border-white/5 my-4 pt-4">
+                 <Link href="/support" onClick={() => setMobileSidebarOpen(false)} className="flex items-center p-3 text-gray-400 hover:text-white rounded-xl"><FiHelpCircle className="mr-3" /> Support</Link>
+                 <Link href="/chat" onClick={() => setMobileSidebarOpen(false)} className="flex items-center p-3 text-gray-400 hover:text-white rounded-xl"><FiMessageSquare className="mr-3" /> Chat</Link>
+              </div>
             </nav>
           </div>
         </>

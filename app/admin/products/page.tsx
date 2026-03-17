@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FiPlus, FiEdit3, FiTrash2, FiBox, FiLayers, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 interface Product {
   _id: string;
@@ -37,209 +38,177 @@ export default function AdminProductsPage() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      getProducts(); // refresh list
+      getProducts();
     } catch (error) {
       console.error("Delete failed:", error);
     }
   };
 
-  useEffect(() => {
-    getProducts();
-  }, []);
+  useEffect(() => { getProducts(); }, []);
 
-  // Pagination calculations
   const totalProducts = products.length;
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = products.slice(startIndex, endIndex);
+  const currentProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
-  const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
-
-  // Skeleton loader
   const SkeletonCard = () => (
-    <div className="border border-[#334155] bg-[#1F2937] rounded-xl p-4 animate-pulse">
-      <div className="h-40 w-full bg-[#334155] rounded-lg mb-4"></div>
-      <div className="h-5 bg-[#334155] rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-[#334155] rounded w-1/2 mb-2"></div>
-      <div className="h-4 bg-[#334155] rounded w-1/3 mb-4"></div>
-      <div className="flex gap-2">
-        <div className="h-8 bg-[#334155] rounded w-16"></div>
-        <div className="h-8 bg-[#334155] rounded w-16"></div>
+    <div className="bg-white rounded-[2.5rem] p-6 border border-gray-100 animate-pulse shadow-sm">
+      <div className="aspect-square w-full bg-gray-100 rounded-3xl mb-6"></div>
+      <div className="h-4 bg-gray-100 rounded-full w-2/3 mb-3"></div>
+      <div className="h-3 bg-gray-50 rounded-full w-1/3 mb-6"></div>
+      <div className="flex gap-3 mt-auto">
+        <div className="h-10 bg-gray-100 rounded-2xl w-full"></div>
+        <div className="h-10 bg-gray-100 rounded-2xl w-full"></div>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-[#0F172A] min-h-screen">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#F9FAFB]">
-            Products
-          </h1>
-          <p className="mt-1 text-sm text-[#9CA3AF]">
-            Manage your product catalog
-          </p>
-        </div>
-        <Link
-          href="/admin/products/new"
-          className="mt-4 sm:mt-0 inline-flex items-center justify-center px-5 py-2.5 bg-[#3B82F6] text-white font-medium rounded-lg hover:bg-[#60A5FA] transition-all duration-300 shadow-lg"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <div className="min-h-screen bg-[#F5F6F7] text-[#2F2F33] pb-20">
+      <div className="max-w-7xl mx-auto px-6 pt-12">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter mb-2">
+              Product <span className="text-blue-600">Inventory</span>
+            </h1>
+            <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">
+              Manage and organize your digital catalog
+            </p>
+          </div>
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#2F2F33] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-blue-600 hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-black/10 active:scale-95"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
-          Add Product
-        </Link>
-      </div>
-
-      {/* Stats / Summary */}
-      {!loading && products.length > 0 && (
-        <div className="mb-6 flex items-center justify-between text-sm text-[#9CA3AF]">
-          <span>
-            Showing <span className="font-medium text-[#F9FAFB]">{startIndex + 1}</span> to{" "}
-            <span className="font-medium text-[#F9FAFB]">{Math.min(endIndex, totalProducts)}</span> of{" "}
-            <span className="font-medium text-[#F9FAFB]">{totalProducts}</span> products
-          </span>
+            <FiPlus size={16} />
+            Add New Product
+          </Link>
         </div>
-      )}
 
-      {/* Product Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {Array.from({ length: itemsPerPage }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-16 bg-[#1F2937] rounded-lg border-2 border-dashed border-[#334155]">
-          <svg
-            className="mx-auto h-12 w-12 text-[#9CA3AF]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-            />
-          </svg>
-          <h3 className="mt-2 text-lg font-medium text-[#F9FAFB]">
-            No products yet
-          </h3>
-          <p className="mt-1 text-sm text-[#9CA3AF]">
-            Get started by creating your first product.
-          </p>
-          <div className="mt-6">
-            <Link
-              href="/admin/products/new"
-              className="inline-flex items-center px-4 py-2 bg-[#3B82F6] text-white rounded-lg hover:bg-[#60A5FA] transition-all duration-300"
-            >
-              Add Product
+        {/* Stats Row */}
+        {!loading && products.length > 0 && (
+          <div className="mb-8 flex items-center justify-between">
+            <div className="px-5 py-2 bg-white rounded-full border border-gray-100 shadow-sm">
+               <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                Showing <span className="text-blue-600">{startIndex + 1} - {Math.min(startIndex + itemsPerPage, totalProducts)}</span> of {totalProducts}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <FiLayers className="text-blue-600" /> Catalog Active
+            </div>
+          </div>
+        )}
+
+        {/* Product Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-32 bg-white rounded-[3.5rem] border border-gray-100 shadow-sm">
+            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-300">
+              <FiBox size={48} />
+            </div>
+            <h3 className="text-2xl font-black text-[#2F2F33] mb-3">No Products Found</h3>
+            <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest mb-10">Start building your store catalog today</p>
+            <Link href="/admin/products/new" className="px-10 py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                Launch First Product
             </Link>
           </div>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {currentProducts.map((product) => (
-              <div
-                key={product._id}
-                className="group bg-[#1F2937] border border-[#334155] rounded-xl shadow-lg hover:shadow-2xl hover:border-[#3B82F6] transition-all duration-300 overflow-hidden"
-              >
-                {/* Image Container */}
-                <div className="aspect-square overflow-hidden bg-[#0F172A]">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "https://via.placeholder.com/400x400?text=No+Image";
-                    }}
-                  />
-                </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {currentProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="group bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-black/5 transition-all duration-500 overflow-hidden flex flex-col"
+                >
+                  {/* Image Container */}
+                  <div className="p-4">
+                    <div className="aspect-square overflow-hidden bg-gray-50 rounded-[2rem] relative border border-gray-50">
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x400?text=No+Image"; }}
+                        />
+                        <div className="absolute top-4 left-4">
+                             <span className="px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[9px] font-black text-[#2F2F33] uppercase tracking-widest shadow-sm">
+                                {product.category}
+                            </span>
+                        </div>
+                    </div>
+                  </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  <h2 className="font-semibold text-[#F9FAFB] truncate">
-                    {product.name}
-                  </h2>
-                  <p className="text-sm text-[#9CA3AF] mt-1 capitalize">
-                    {product.category}
-                  </p>
-                  <p className="text-lg font-bold text-[#F9FAFB] mt-2">
-                    ₹{product.price.toLocaleString()}
-                  </p>
+                  {/* Content */}
+                  <div className="px-8 pb-8 flex-1 flex flex-col">
+                    <h2 className="text-lg font-black text-[#2F2F33] tracking-tight group-hover:text-blue-600 transition-colors truncate">
+                      {product.name}
+                    </h2>
+                    <p className="text-2xl font-black text-[#2F2F33] mt-2 tracking-tighter">
+                      ₹{product.price.toLocaleString()}
+                    </p>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-4">
-                    <Link
-                      href={`/admin/products/${product._id}`}
-                      className="flex-1 text-center px-3 py-2 border border-[#3B82F6] text-[#3B82F6] font-medium rounded-lg hover:bg-[#3B82F6] hover:text-white transition-all duration-300 text-sm"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => deleteProduct(product._id)}
-                      className="flex-1 px-3 py-2 border border-red-600 text-[#3B82F6] font-medium rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300 text-sm"
-                    >
-                      Delete
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 mt-8">
+                      <Link
+                        href={`/admin/products/${product._id}`}
+                        className="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 text-[#2F2F33] text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-blue-50 hover:text-blue-600 transition-all"
+                      >
+                        <FiEdit3 size={14} /> Edit
+                      </Link>
+                      <button
+                        onClick={() => deleteProduct(product._id)}
+                        className="w-14 flex items-center justify-center py-4 bg-gray-50 text-gray-400 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center items-center space-x-2">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-4 py-2 border border-[#334155] rounded-lg text-[#9CA3AF] hover:bg-[#1F2937] hover:text-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Previous
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => goToPage(page)}
-                  className={`w-10 h-10 rounded-lg transition-colors ${
-                    currentPage === page
-                      ? "bg-[#3B82F6] text-white"
-                      : "text-[#9CA3AF] hover:bg-[#1F2937] hover:text-[#F9FAFB]"
-                  }`}
-                >
-                  {page}
-                </button>
               ))}
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 border border-[#334155] rounded-lg text-[#9CA3AF] hover:bg-[#1F2937] hover:text-[#F9FAFB] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Next
-              </button>
             </div>
-          )}
-        </>
-      )}
+
+            {/* Premium Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-16 flex justify-center items-center gap-4">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-100 disabled:opacity-30 transition-all shadow-sm"
+                >
+                  <FiChevronLeft size={20} />
+                </button>
+                
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-3xl border border-gray-100 shadow-sm">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-2xl text-[11px] font-black transition-all ${
+                        currentPage === page
+                            ? "bg-[#2F2F33] text-white shadow-lg"
+                            : "text-gray-400 hover:bg-gray-50"
+                        }`}
+                    >
+                        {page}
+                    </button>
+                    ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-100 disabled:opacity-30 transition-all shadow-sm"
+                >
+                  <FiChevronRight size={20} />
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

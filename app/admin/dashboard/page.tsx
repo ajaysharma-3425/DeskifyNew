@@ -1,448 +1,317 @@
-"use client";
+  "use client";
 
-import { useEffect, useState } from "react";
-import {
-  FiRefreshCw,
-  FiBell,
-  FiX,
-  FiPackage,
-  FiShoppingCart,
-  FiUsers,
-  FiDollarSign,
-  FiTrendingUp,
-  FiClock,
-} from "react-icons/fi";
-import { DashboardStats } from "@/types/dashboard";
-import Link from "next/link";
+  import { useEffect, useState } from "react";
+  import {
+    FiRefreshCw,
+    FiBell,
+    FiX,
+    FiPackage,
+    FiShoppingCart,
+    FiUsers,
+    FiDollarSign,
+    FiTrendingUp,
+    FiClock,
+    FiArrowUpRight,
+  } from "react-icons/fi";
+  import { DashboardStats } from "@/types/dashboard";
+  import Link from "next/link";
 
-// Types for orders
-type RecentOrder = {
-  _id: string;
-  user?: { name: string; email: string };
-  totalAmount: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  createdAt: string;
-};
-
-// Updated status colors using slate + blue accents
-const statusColors = {
-  pending: "bg-[#1F2937] text-[#9CA3AF] border border-[#334155]",
-  processing: "bg-[rgba(59,130,246,0.15)] text-[#3B82F6]",
-  shipped: "bg-[rgba(59,130,246,0.15)] text-[#3B82F6]",
-  delivered: "bg-[rgba(59,130,246,0.15)] text-[#3B82F6]",
-  cancelled: "bg-[#1F2937] text-[#9CA3AF] border border-[#334155] line-through",
-};
-
-// Mock revenue data (you can replace with real data later)
-const mockRevenueData = [
-  { day: "Mon", revenue: 1200 },
-  { day: "Tue", revenue: 1800 },
-  { day: "Wed", revenue: 1600 },
-  { day: "Thu", revenue: 2200 },
-  { day: "Fri", revenue: 2600 },
-  { day: "Sat", revenue: 3100 },
-  { day: "Sun", revenue: 2800 },
-];
-
-export default function AdminDashboardPage() {
-  // Stats state
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [statsError, setStatsError] = useState<string | null>(null);
-
-  // Recent orders state
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
-  const [ordersError, setOrdersError] = useState<string | null>(null);
-
-  // New order alert
-  const [lastOrderCount, setLastOrderCount] = useState<number | null>(null);
-  const [showNewOrderAlert, setShowNewOrderAlert] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  // Fetch both stats and recent orders
-  const fetchDashboardData = async (showLoading = true) => {
-    if (showLoading) {
-      setLoadingStats(true);
-      setLoadingOrders(true);
-    }
-    setStatsError(null);
-    setOrdersError(null);
-
-    const token = localStorage.getItem("token");
-    const headers = { Authorization: `Bearer ${token}` };
-
-    try {
-      // Fetch stats
-      const statsRes = await fetch("/api/admin/dashboard", { headers });
-      if (!statsRes.ok) throw new Error("Failed to fetch stats");
-      const statsData: DashboardStats = await statsRes.json();
-
-      // Check for new orders
-      if (lastOrderCount !== null && statsData.orders > lastOrderCount) {
-        setShowNewOrderAlert(true);
-      }
-
-      setStats(statsData);
-      setLastOrderCount(statsData.orders);
-      setLastUpdated(new Date());
-    } catch (err) {
-      setStatsError(err instanceof Error ? err.message : "Stats error");
-    } finally {
-      setLoadingStats(false);
-    }
-
-    try {
-      // Fetch recent orders (limit to last 5 on client side)
-      const ordersRes = await fetch("/api/admin/orders", { headers });
-      if (!ordersRes.ok) throw new Error("Failed to fetch orders");
-      const ordersData: RecentOrder[] = await ordersRes.json();
-      // Sort by createdAt descending (already sorted by API) and take first 5
-      setRecentOrders(ordersData.slice(0, 5));
-    } catch (err) {
-      setOrdersError(err instanceof Error ? err.message : "Orders error");
-    } finally {
-      setLoadingOrders(false);
-    }
+  // Types for orders
+  type RecentOrder = {
+    _id: string;
+    user?: { name: string; email: string };
+    totalAmount: number;
+    status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+    createdAt: string;
   };
 
-  // Initial fetch
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  // --- LIGHT THEME COLOR PALETTE ---
+  // Emerald for success/active, Rose for alerts/urgent, Slate for structure
+  const statusColors = {
+    pending: "bg-amber-100 text-amber-700 border border-amber-200",
+    processing: "bg-blue-100 text-blue-700 border border-blue-200",
+    shipped: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+    delivered: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    cancelled: "bg-rose-100 text-rose-700 border border-rose-200 line-through",
+  };
 
-  // Polling for new orders (only stats)
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch("/api/admin/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data: DashboardStats = await res.json();
-          if (lastOrderCount !== null && data.orders > lastOrderCount) {
-            setShowNewOrderAlert(true);
-          }
-          setLastOrderCount(data.orders);
-          setLastUpdated(new Date());
-        }
-      } catch (error) {
-        // Silent fail for polling
+  const mockRevenueData = [
+    { day: "Mon", revenue: 1200 },
+    { day: "Tue", revenue: 1800 },
+    { day: "Wed", revenue: 1600 },
+    { day: "Thu", revenue: 2200 },
+    { day: "Fri", revenue: 2600 },
+    { day: "Sat", revenue: 3100 },
+    { day: "Sun", revenue: 2800 },
+  ];
+
+  export default function AdminDashboardPage() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loadingStats, setLoadingStats] = useState(true);
+    const [statsError, setStatsError] = useState<string | null>(null);
+    const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+    const [loadingOrders, setLoadingOrders] = useState(true);
+    const [ordersError, setOrdersError] = useState<string | null>(null);
+    const [lastOrderCount, setLastOrderCount] = useState<number | null>(null);
+    const [showNewOrderAlert, setShowNewOrderAlert] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+    const fetchDashboardData = async (showLoading = true) => {
+      if (showLoading) {
+        setLoadingStats(true);
+        setLoadingOrders(true);
       }
-    }, 30000);
+      setStatsError(null);
+      setOrdersError(null);
 
-    return () => clearInterval(interval);
-  }, [lastOrderCount]);
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
 
-  const handleRefresh = () => fetchDashboardData(true);
-  const dismissAlert = () => setShowNewOrderAlert(false);
+      try {
+        const statsRes = await fetch("/api/admin/dashboard", { headers });
+        if (!statsRes.ok) throw new Error("Failed to fetch stats");
+        const statsData: DashboardStats = await statsRes.json();
 
-  // Stats cards configuration – all use blue accent
-  const statCards = stats
-    ? [
-        {
-          title: "Total Products",
-          value: stats.products,
-          icon: FiPackage,
-          change: "+12%",
-          trend: "up",
-        },
-        {
-          title: "Total Orders",
-          value: stats.orders,
-          icon: FiShoppingCart,
-          change: "+8%",
-          trend: "up",
-        },
-        {
-          title: "Total Users",
-          value: stats.users,
-          icon: FiUsers,
-          change: "+5%",
-          trend: "up",
-        },
-        {
-          title: "Total Revenue",
-          value: `₹${stats.revenue.toLocaleString("en-IN")}`,
-          icon: FiDollarSign,
-          change: "+18%",
-          trend: "up",
-        },
-      ]
-    : [];
+        if (lastOrderCount !== null && statsData.orders > lastOrderCount) {
+          setShowNewOrderAlert(true);
+        }
 
-  // Loading state for initial page load
-  const isLoading = loadingStats && !stats;
+        setStats(statsData);
+        setLastOrderCount(statsData.orders);
+        setLastUpdated(new Date());
+      } catch (err) {
+        setStatsError(err instanceof Error ? err.message : "Stats error");
+      } finally {
+        setLoadingStats(false);
+      }
 
-  if (isLoading) {
+      try {
+        const ordersRes = await fetch("/api/admin/orders", { headers });
+        if (!ordersRes.ok) throw new Error("Failed to fetch orders");
+        const ordersData: RecentOrder[] = await ordersRes.json();
+        setRecentOrders(ordersData.slice(0, 5));
+      } catch (err) {
+        setOrdersError(err instanceof Error ? err.message : "Orders error");
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+
+    useEffect(() => {
+      fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        const token = localStorage.getItem("token");
+        try {
+          const res = await fetch("/api/admin/dashboard", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data: DashboardStats = await res.json();
+            if (lastOrderCount !== null && data.orders > lastOrderCount) {
+              setShowNewOrderAlert(true);
+            }
+            setLastOrderCount(data.orders);
+            setLastUpdated(new Date());
+          }
+        } catch (error) {}
+      }, 30000);
+      return () => clearInterval(interval);
+    }, [lastOrderCount]);
+
+    const handleRefresh = () => fetchDashboardData(true);
+    const dismissAlert = () => setShowNewOrderAlert(false);
+
+    const statCards = stats
+      ? [
+          { title: "Products", value: stats.products, icon: FiPackage, color: "text-emerald-600", bg: "bg-emerald-100", change: "+12%" },
+          { title: "Total Orders", value: stats.orders, icon: FiShoppingCart, color: "text-blue-600", bg: "bg-blue-100", change: "+8%" },
+          { title: "Total Users", value: stats.users, icon: FiUsers, color: "text-indigo-600", bg: "bg-indigo-100", change: "+5%" },
+          { title: "Revenue", value: `₹${stats.revenue.toLocaleString("en-IN")}`, icon: FiDollarSign, color: "text-rose-600", bg: "bg-rose-100", change: "+18%" },
+        ]
+      : [];
+
+    if (loadingStats && !stats) {
+      return (
+        <div className="min-h-screen bg-white p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="h-12 w-48 bg-[#F5F6F7] animate-pulse rounded-lg" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => <div key={i} className="h-32 bg-[#F5F6F7] animate-pulse rounded-2xl" />)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="min-h-screen bg-[#0F172A] py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <div className="h-10 w-64 bg-[#1F2937] rounded-lg animate-pulse" />
-            <div className="h-10 w-24 bg-[#1F2937] rounded-lg animate-pulse" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-[#1F2937] rounded-xl animate-pulse" />
-            ))}
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 h-80 bg-[#1F2937] rounded-xl animate-pulse" />
-            <div className="h-80 bg-[#1F2937] rounded-xl animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#0F172A] py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-[#F9FAFB]">
-              Welcome back, Admin
-            </h1>
-            <p className="text-[#9CA3AF] mt-1">
-              Here's what's happening with your store today.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {lastUpdated && (
-              <span className="text-sm text-[#9CA3AF] flex items-center gap-1">
-                <FiClock size={14} />
-                Last updated: {lastUpdated.toLocaleTimeString()}
-              </span>
-            )}
-            <button
-              onClick={handleRefresh}
-              className="flex items-center gap-2 px-4 py-2 bg-[#3B82F6] hover:bg-[#60A5FA] text-white rounded-lg transition-all duration-300 shadow-lg"
-              disabled={loadingStats || loadingOrders}
-            >
-              <FiRefreshCw className={`${loadingStats || loadingOrders ? "animate-spin" : ""}`} />
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        {/* New Order Alert – using blue accents */}
-        {showNewOrderAlert && (
-          <div className="mb-6 animate-slideDown">
-            <div className="bg-[#1F2937] border-l-4 border-[#3B82F6] rounded-lg p-4 shadow-lg flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <FiBell className="text-[#3B82F6] text-xl mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-[#F9FAFB]">
-                    New Order Received!
-                  </h3>
-                  <p className="text-sm text-[#9CA3AF]">
-                    A new order has been placed.{" "}
-                    <Link
-                      href="/admin/orders"
-                      className="underline font-medium text-[#3B82F6] hover:text-[#60A5FA]"
-                    >
-                      View orders
-                    </Link>
-                  </p>
-                </div>
+      <div className="min-h-screen bg-white pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          
+          {/* --- HEADER --- */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-[#2F2F33] tracking-tight">Dashboard Overview</h1>
+              <p className="text-gray-500 font-medium">Monitoring Deskify store performance</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center px-3 py-1.5 bg-[#F5F6F7] border border-gray-100 rounded-full text-[12px] font-bold text-gray-400">
+                <FiClock className="mr-2" /> UPDATED: {lastUpdated?.toLocaleTimeString()}
               </div>
               <button
-                onClick={dismissAlert}
-                className="text-[#9CA3AF] hover:text-[#F9FAFB]"
+                onClick={handleRefresh}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#2F2F33] text-white rounded-xl font-bold hover:shadow-xl hover:shadow-[#2F2F33]/20 transition-all active:scale-95"
               >
-                <FiX size={20} />
+                <FiRefreshCw className={loadingStats ? "animate-spin" : ""} />
+                Sync Data
               </button>
             </div>
           </div>
-        )}
 
-        {/* Error messages – use red but keep within theme, maybe use a muted red variant */}
-        {statsError && (
-          <div className="mb-6 bg-[#1F2937] border-l-4 border-[#9CA3AF] rounded-lg p-4">
-            <p className="text-[#F9FAFB]">Stats error: {statsError}</p>
-          </div>
-        )}
-        {ordersError && (
-          <div className="mb-6 bg-[#1F2937] border-l-4 border-[#9CA3AF] rounded-lg p-4">
-            <p className="text-[#F9FAFB]">Orders error: {ordersError}</p>
-          </div>
-        )}
+          {/* --- ALERTS --- */}
+          {showNewOrderAlert && (
+            <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="bg-[#2F2F33] rounded-2xl p-5 shadow-2xl flex items-center justify-between border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-500/40">
+                    <FiBell size={24} className="animate-bounce" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-lg">New Order Placed!</h3>
+                    <p className="text-gray-400 text-sm">Check the orders panel to process it immediately.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Link href="/admin/orders" className="px-4 py-2 bg-white text-[#2F2F33] rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">View All</Link>
+                  <button onClick={dismissAlert} className="text-gray-400 hover:text-white"><FiX size={20} /></button>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Stats Grid */}
-        {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {statCards.map((card, idx) => {
-              const Icon = card.icon;
-              return (
-                <div
-                  key={idx}
-                  className="bg-[#1F2937] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-[#334155]"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-lg bg-[rgba(59,130,246,0.15)] text-[#3B82F6]">
-                      <Icon size={24} />
-                    </div>
-                    <span className="text-sm font-medium px-2 py-1 rounded-full bg-[rgba(59,130,246,0.15)] text-[#3B82F6]">
-                      {card.change}
+          {/* --- STATS GRID --- */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {statCards.map((card, idx) => (
+              <div key={idx} className="bg-[#F5F6F7] rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-2xl ${card.bg} ${card.color} transition-transform group-hover:scale-110`}>
+                    <card.icon size={22} />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Growth</span>
+                    <span className="text-emerald-600 text-xs font-bold flex items-center">
+                      <FiTrendingUp className="mr-1" /> {card.change}
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-[#F9FAFB]">
-                    {card.value}
-                  </p>
-                  <p className="text-sm text-[#9CA3AF] mt-1">
-                    {card.title}
-                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Charts and Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Revenue Chart (mock) */}
-          <div className="lg:col-span-2 bg-[#1F2937] rounded-xl shadow-lg p-6 border border-[#334155]">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-[#F9FAFB]">
-                Revenue Overview (Last 7 Days)
-              </h2>
-              <FiTrendingUp className="text-[#9CA3AF]" size={20} />
-            </div>
-            <div className="h-64 flex items-end justify-between gap-2">
-              {mockRevenueData.map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center w-full">
-                  <div
-                    className="w-full bg-[#3B82F6] rounded-t-md transition-all duration-300 hover:bg-[#60A5FA]"
-                    style={{ height: `${(item.revenue / 3500) * 200}px` }}
-                  />
-                  <span className="text-xs text-[#9CA3AF] mt-2">
-                    {item.day}
-                  </span>
+                <h3 className="text-3xl font-black text-[#2F2F33] tracking-tight">{card.value}</h3>
+                <p className="text-sm font-bold text-gray-400 uppercase tracking-tighter mt-1">{card.title}</p>
+                <div className="absolute -right-2 -bottom-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                  <card.icon size={80} />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-[#1F2937] rounded-xl shadow-lg p-6 border border-[#334155]">
-            <h2 className="text-lg font-semibold text-[#F9FAFB] mb-4">
-              Quick Actions
-            </h2>
-            <div className="space-y-3">
-              <Link
-                href="/admin/products/new"
-                className="flex items-center gap-3 p-3 bg-[#0F172A] rounded-lg hover:bg-[#111827] transition-all duration-300 border border-[#334155] hover:border-[#3B82F6]"
-              >
-                <div className="p-2 bg-[rgba(59,130,246,0.15)] rounded-lg text-[#3B82F6]">
-                  <FiPackage size={18} />
+          {/* --- CHARTS & ACTIONS --- */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Revenue Graph */}
+            <div className="lg:col-span-2 bg-[#F5F6F7] rounded-3xl p-8 border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-xl font-black text-[#2F2F33]">Weekly Revenue</h2>
+                  <p className="text-sm text-gray-400 font-medium">Sales performance per day</p>
                 </div>
-                <span className="text-sm font-medium text-[#F9FAFB]">
-                  Add New Product
-                </span>
-              </Link>
-              <Link
-                href="/admin/orders"
-                className="flex items-center gap-3 p-3 bg-[#0F172A] rounded-lg hover:bg-[#111827] transition-all duration-300 border border-[#334155] hover:border-[#3B82F6]"
-              >
-                <div className="p-2 bg-[rgba(59,130,246,0.15)] rounded-lg text-[#3B82F6]">
-                  <FiShoppingCart size={18} />
-                </div>
-                <span className="text-sm font-medium text-[#F9FAFB]">
-                  View All Orders
-                </span>
-              </Link>
-              <Link
-                href="/admin/users"
-                className="flex items-center gap-3 p-3 bg-[#0F172A] rounded-lg hover:bg-[#111827] transition-all duration-300 border border-[#334155] hover:border-[#3B82F6]"
-              >
-                <div className="p-2 bg-[rgba(59,130,246,0.15)] rounded-lg text-[#3B82F6]">
-                  <FiUsers size={18} />
-                </div>
-                <span className="text-sm font-medium text-[#F9FAFB]">
-                  Manage Users
-                </span>
-              </Link>
+                <select className="bg-white border-none text-xs font-bold rounded-lg px-3 py-2 outline-none">
+                  <option>Last 7 Days</option>
+                  <option>Last 30 Days</option>
+                </select>
+              </div>
+              <div className="h-64 flex items-end justify-between gap-3 sm:gap-6 px-2">
+                {mockRevenueData.map((item, idx) => (
+                  <div key={idx} className="flex flex-col items-center flex-1 group">
+                    <div className="w-full bg-white rounded-2xl relative overflow-hidden" style={{ height: `200px` }}>
+                      <div 
+                        className="absolute bottom-0 w-full bg-[#2F2F33] rounded-2xl transition-all duration-700 ease-out group-hover:bg-emerald-600"
+                        style={{ height: `${(item.revenue / 3500) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-black text-gray-400 mt-4 uppercase">{item.day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-[#2F2F33] rounded-3xl p-8 shadow-xl text-white">
+              <h2 className="text-xl font-black mb-6 tracking-tight">Quick Controls</h2>
+              <div className="space-y-4">
+                {[
+                  { label: "New Product", href: "/admin/products/new", icon: FiPackage, bg: "bg-emerald-500" },
+                  { label: "Check Orders", href: "/admin/orders", icon: FiShoppingCart, bg: "bg-blue-500" },
+                  { label: "User Database", href: "/admin/users", icon: FiUsers, bg: "bg-rose-500" }
+                ].map((action, i) => (
+                  <Link key={i} href={action.href} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 border border-white/5 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 ${action.bg} rounded-xl flex items-center justify-center text-white shadow-lg`}><action.icon size={18} /></div>
+                      <span className="font-bold text-sm">{action.label}</span>
+                    </div>
+                    <FiArrowUpRight className="text-gray-500 group-hover:text-white transition-colors" />
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-8 p-5 bg-white/5 rounded-2xl border border-dashed border-white/20">
+                <p className="text-xs text-gray-400 leading-relaxed font-medium">Tip: Use the sync button to manually refresh inventory data across all nodes.</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Recent Orders Table */}
-        <div className="mt-6 bg-[#1F2937] rounded-xl shadow-lg p-6 border border-[#334155]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-[#F9FAFB]">
-              Recent Orders
-            </h2>
-            <Link
-              href="/admin/orders"
-              className="text-sm text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
-            >
-              View All
-            </Link>
-          </div>
-
-          {loadingOrders ? (
-            // Loading skeletons for orders
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-[#0F172A] rounded animate-pulse" />
-              ))}
+          {/* --- RECENT ORDERS TABLE --- */}
+          <div className="mt-10 bg-[#F5F6F7] rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-8 flex items-center justify-between border-b border-gray-50">
+              <h2 className="text-xl font-black text-[#2F2F33]">Live Transactions</h2>
+              <Link href="/admin/orders" className="px-4 py-2 bg-white text-[#2F2F33] rounded-xl text-xs font-black uppercase tracking-tighter hover:bg-gray-100 transition-colors">See Ledger</Link>
             </div>
-          ) : ordersError ? (
-            <p className="text-[#F9FAFB]">Failed to load orders</p>
-          ) : recentOrders.length > 0 ? (
+
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-[#9CA3AF] uppercase bg-[#0F172A]">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">Order ID</th>
-                    <th scope="col" className="px-6 py-3">Customer</th>
-                    <th scope="col" className="px-6 py-3">Amount</th>
-                    <th scope="col" className="px-6 py-3">Status</th>
-                    <th scope="col" className="px-6 py-3">Date</th>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50">
+                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Ref</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer Detail</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-50">
                   {recentOrders.map((order) => (
-                    <tr
-                      key={order._id}
-                      className="border-b border-[#334155] hover:bg-[#111827] transition-colors"
-                    >
-                      <td className="px-6 py-4 font-medium text-[#F9FAFB]">
-                        <Link href={`/admin/orders/${order._id}`} className="hover:underline">
-                          {order._id.slice(-8)}
+                    <tr key={order._id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <Link href={`/admin/orders/${order._id}`} className="font-bold text-[#2F2F33] hover:text-emerald-600 flex items-center">
+                          #{order._id.slice(-8).toUpperCase()}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-[#9CA3AF]">
-                        {order.user?.name || order.user?.email || "Guest"}
+                      <td className="px-8 py-5">
+                        <p className="font-bold text-sm text-[#2F2F33]">{order.user?.name || "Guest User"}</p>
+                        <p className="text-xs text-gray-400 font-medium">{order.user?.email || "No email"}</p>
                       </td>
-                      <td className="px-6 py-4 text-[#F9FAFB]">
-                        ₹{order.totalAmount.toLocaleString("en-IN")}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            statusColors[order.status] || statusColors.pending
-                          }`}
-                        >
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <td className="px-8 py-5 font-black text-[#2F2F33]">₹{order.totalAmount.toLocaleString("en-IN")}</td>
+                      <td className="px-8 py-5">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${statusColors[order.status]}`}>
+                          {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-[#9CA3AF]">
-                        {new Date(order.createdAt).toLocaleDateString("en-IN")}
-                      </td>
+                      <td className="px-8 py-5 text-gray-400 text-xs font-bold">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: '2-digit', month: 'short' })}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : (
-            <p className="text-[#9CA3AF]">No orders found</p>
-          )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

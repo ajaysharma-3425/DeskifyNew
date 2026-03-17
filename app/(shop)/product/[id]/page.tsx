@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiChevronRight, FiHeart, FiShare2, FiShield,
-  FiTruck, FiRotateCcw, FiPlus, FiMinus, FiCheckCircle, FiZap
+  FiTruck, FiRotateCcw, FiPlus, FiMinus, FiCheckCircle, FiZap, FiArrowLeft
 } from "react-icons/fi";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -32,7 +32,6 @@ export default function ProductDetails() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
 
-  // Discount Logic: Same as Products Page
   const getDiscount = (pid: string, cat: string) => {
     const lastDigit = pid.slice(-1).charCodeAt(0);
     if (cat === "Electronics") return 15 + (lastDigit % 11);
@@ -46,7 +45,7 @@ export default function ProductDetails() {
       try {
         setLoading(true);
         const res = await fetch(`/api/products/${id}`);
-        if (!res.ok) throw new Error("Product not found");
+        if (!res.ok) throw new Error("Artifact not found in vault");
         const data = await res.json();
         const mainProduct = data.product;
         setProduct(mainProduct);
@@ -60,7 +59,7 @@ export default function ProductDetails() {
           setRelatedProducts(filtered);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load product");
+        setError(err instanceof Error ? err.message : "Protocol Error");
       } finally {
         setLoading(false);
       }
@@ -75,7 +74,6 @@ export default function ProductDetails() {
     }
   }, [id]);
 
-  // 2. Toggle Whitelist Function
   const toggleWhitelist = () => {
     const saved = JSON.parse(localStorage.getItem("whitelist") || "[]");
     let updated;
@@ -103,49 +101,51 @@ export default function ProductDetails() {
   if (error || !product) return <ErrorState error={error} />;
 
   return (
-    <div className="bg-[#FAFAFB] min-h-screen pb-32">
-      {/* BREADCRUMB - Clean & Thin */}
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-6">
-        <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-          <Link href="/" className="hover:text-emerald-500 transition-colors">Home</Link>
-          <FiChevronRight className="opacity-50" />
-          <Link href="/product" className="hover:text-emerald-500 transition-colors">Store</Link>
-          <FiChevronRight className="opacity-50" />
-          <span className="text-slate-900 truncate max-w-[150px]">{product.name}</span>
+    <div className="bg-[#003F3A] min-h-screen pb-32 relative overflow-hidden">
+       {/* Background Glows */}
+      <div className="absolute top-0 left-[-10%] w-[50%] h-[50%] bg-[#A4F000]/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      {/* BREADCRUMB */}
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-8 relative z-10">
+        <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/30">
+          <Link href="/" className="hover:text-[#A4F000] transition-colors">Home</Link>
+          <FiChevronRight />
+          <Link href="/product" className="hover:text-[#A4F000] transition-colors">Vault</Link>
+          <FiChevronRight />
+          <span className="text-[#A4F000] truncate max-w-[150px] italic">{product.name}</span>
         </nav>
       </div>
 
-      <main className="max-w-7xl mx-auto px-6">
+      <main className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-20 items-start">
 
           {/* LEFT: IMAGE GALLERY */}
           <div className="lg:col-span-7">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-[4/5] md:aspect-square w-full rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl shadow-slate-200/40 group"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative aspect-square w-full rounded-[3rem] overflow-hidden bg-white/[0.03] border border-white/10 backdrop-blur-md group"
             >
-              {/* CURVED DISCOUNT BADGE */}
-              <div className="absolute top-0 left-0 z-10">
-                <div className="bg-rose-600 text-white text-xs font-black px-6 py-3 rounded-br-[2rem] shadow-xl flex flex-col items-center">
-                  <span className="text-lg leading-none">{discountPercent}% OFF</span>
-                  <span className="text-[8px] uppercase tracking-tighter opacity-80 font-bold">Special Offer</span>
+              {/* DISCOUNT BADGE */}
+              <div className="absolute top-0 left-0 z-20">
+                <div className="bg-[#A4F000] text-[#003F3A] text-xs font-black px-8 py-4 rounded-br-[2.5rem] shadow-2xl flex flex-col items-center italic uppercase">
+                  <span className="text-xl leading-none">-{discountPercent}%</span>
+                  <span className="text-[8px] tracking-widest font-black mt-1">Artifact Offer</span>
                 </div>
               </div>
 
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-contain p-8 lg:p-16 group-hover:scale-105 transition-transform duration-1000"
+                className="w-full h-full object-contain p-8 lg:p-16 group-hover:scale-110 transition-transform duration-[1.5s] opacity-90 group-hover:opacity-100"
               />
 
               <button
-                onClick={toggleWhitelist} // Yahan change kiya
-                className={`absolute top-6 right-6 p-4 backdrop-blur-md rounded-2xl shadow-lg transition-all active:scale-90
-    opacity-100 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0
-    ${isWishlisted ? "bg-rose-500 text-white" : "bg-white/80 text-slate-400 hover:text-rose-500"}`}
+                onClick={toggleWhitelist}
+                className={`absolute top-8 right-8 p-5 backdrop-blur-xl rounded-2xl shadow-2xl transition-all active:scale-90 border border-white/10
+                ${isWishlisted ? "bg-[#A4F000] text-[#003F3A]" : "bg-white/5 text-white/40 hover:text-[#A4F000]"}`}
               >
-                <FiHeart className={isWishlisted ? "fill-white" : ""} size={22} />
+                <FiHeart className={isWishlisted ? "fill-current" : ""} size={24} />
               </button>
             </motion.div>
           </div>
@@ -154,101 +154,101 @@ export default function ProductDetails() {
           <div className="lg:col-span-5 space-y-10">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
-                  <FiZap className="fill-emerald-600" /> Hot Seller
+                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#A4F000]/10 text-[#A4F000] text-[9px] font-black uppercase tracking-[0.2em] border border-[#A4F000]/20 italic">
+                  <FiZap className="fill-current" /> High Demand
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest">
-                  <FiCheckCircle /> {product.inStock !== false ? "In Stock" : "Limited"}
+                <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/5 text-white/40 text-[9px] font-black uppercase tracking-[0.2em] italic">
+                  <FiCheckCircle /> {product.inStock !== false ? "Verified Stock" : "Limited Slot"}
                 </div>
               </div>
 
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1] tracking-tighter">
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter uppercase italic">
                 {product.name}
               </h1>
 
-              <div className="flex flex-col">
-                <span className="text-slate-400 line-through font-bold text-lg decoration-rose-500/30">
+              <div className="flex flex-col gap-1 pt-4">
+                <span className="text-white/20 line-through font-black text-xl tracking-tighter italic">
                   ₹{mrp.toLocaleString("en-IN")}
                 </span>
-                <div className="flex items-center gap-3">
-                  <p className="text-5xl font-black text-emerald-600 tracking-tighter">
+                <div className="flex items-center gap-4">
+                  <p className="text-6xl font-black text-[#A4F000] tracking-tighter italic leading-none">
                     ₹{product.price.toLocaleString("en-IN")}
                   </p>
-                  <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-1 rounded-md">
-                    SAVE ₹{(mrp - product.price).toLocaleString()}
+                  <span className="bg-white/5 text-white/40 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest border border-white/5">
+                    Save ₹{(mrp - product.price).toLocaleString()}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* ACTION CARD */}
-            <div className="p-8 bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/30 space-y-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
-
+            <div className="p-8 bg-white/[0.03] rounded-[3rem] border border-white/10 backdrop-blur-xl space-y-8 relative overflow-hidden">
               <div className="flex items-center justify-between relative z-10">
-                <span className="text-slate-900 font-black uppercase text-xs tracking-widest">Select Quantity</span>
-                <div className="flex items-center bg-slate-50 rounded-2xl p-1.5 border border-slate-200 shadow-inner">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:text-emerald-500 transition-colors"><FiMinus /></button>
-                  <span className="w-12 text-center font-black text-lg text-slate-900">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 hover:text-emerald-500 transition-colors"><FiPlus /></button>
+                <span className="text-white font-black uppercase text-[10px] tracking-[0.3em] opacity-40">Unit Allocation</span>
+                <div className="flex items-center bg-[#003F3A] rounded-2xl p-1.5 border border-white/5">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-white/40 hover:text-[#A4F000] transition-colors"><FiMinus /></button>
+                  <span className="w-12 text-center font-black text-xl text-[#A4F000] italic">{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-white/40 hover:text-[#A4F000] transition-colors"><FiPlus /></button>
                 </div>
               </div>
 
               <div className="flex gap-4 relative z-10">
-                <div className="flex-grow transform hover:scale-[1.02] transition-transform">
+                <div className="flex-grow">
                   <AddToCartButton productId={product._id} quantity={quantity} />
                 </div>
-                <button className="p-5 bg-slate-900 text-white rounded-[1.5rem] hover:bg-emerald-600 transition-all shadow-xl shadow-slate-900/20 active:scale-95">
+                <button className="p-5 bg-white/5 text-white rounded-[1.5rem] hover:bg-white hover:text-[#003F3A] transition-all border border-white/10">
                   <FiShare2 size={24} />
                 </button>
               </div>
             </div>
 
-            {/* TRUST BADGES - Improved Visuals */}
-            <div className="grid grid-cols-3 gap-4 border-t border-slate-100 pt-10">
-              <TrustBadge icon={<FiTruck />} label="Fast" sub="Shipping" />
-              <TrustBadge icon={<FiShield />} label="Secure" sub="Warranty" />
-              <TrustBadge icon={<FiRotateCcw />} label="7-Day" sub="Returns" />
+            {/* TRUST BADGES */}
+            <div className="grid grid-cols-3 gap-4 pt-4">
+              <TrustBadge icon={<FiTruck />} label="Express" sub="Node Delivery" />
+              <TrustBadge icon={<FiShield />} label="Encrypted" sub="Warranty" />
+              <TrustBadge icon={<FiRotateCcw />} label="7-Day" sub="Protocol" />
             </div>
           </div>
         </div>
 
         {/* TABS SECTION */}
         <section className="mt-24 lg:mt-40">
-          <div className="flex border-b border-slate-200 gap-8 sm:gap-16 mb-12 overflow-x-auto no-scrollbar justify-center lg:justify-start">
-            <TabButton active={activeTab === 'description'} onClick={() => setActiveTab('description')}>Description</TabButton>
-            <TabButton active={activeTab === 'specs'} onClick={() => setActiveTab('specs')}>Specifications</TabButton>
-            <TabButton active={activeTab === 'shipping'} onClick={() => setActiveTab('shipping')}>Delivery Info</TabButton>
+          <div className="flex border-b border-white/5 gap-8 sm:gap-16 mb-12 overflow-x-auto no-scrollbar justify-center lg:justify-start">
+            <TabButton active={activeTab === 'description'} onClick={() => setActiveTab('description')}>Intel</TabButton>
+            <TabButton active={activeTab === 'specs'} onClick={() => setActiveTab('specs')}>Data Sheet</TabButton>
+            <TabButton active={activeTab === 'shipping'} onClick={() => setActiveTab('shipping')}>Logistics</TabButton>
           </div>
 
-          <div className="max-w-4xl min-h-[200px] mx-auto lg:mx-0">
+          <div className="max-w-4xl min-h-[200px] mx-auto lg:mx-0 px-2">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                className="text-slate-600 text-lg leading-relaxed font-medium"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-white/60 text-lg leading-relaxed font-medium"
               >
                 {activeTab === 'description' && (
                   <div className="space-y-4">
-                    <p className="whitespace-pre-line first-letter:text-5xl first-letter:font-black first-letter:text-emerald-500 first-letter:mr-3 first-letter:float-left">
+                    <p className="whitespace-pre-line first-letter:text-7xl first-letter:font-black first-letter:text-[#A4F000] first-letter:mr-4 first-letter:float-left first-letter:italic">
                       {product.description}
                     </p>
                   </div>
                 )}
                 {activeTab === 'specs' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <SpecItem label="SKU" value={product.sku || "N/A"} />
-                    <SpecItem label="Category" value={product.category || "General"} />
-                    <SpecItem label="Status" value="Quality Certified" />
-                    <SpecItem label="Material" value="Premium Grade" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <SpecItem label="ID CODE" value={product.sku || "DE-VAULT-X"} />
+                    <SpecItem label="ORIGIN" value={product.category || "General"} />
+                    <SpecItem label="INTEGRITY" value="Premium Certified" />
+                    <SpecItem label="STRUCTURE" value="High-Grade Build" />
                   </div>
                 )}
                 {activeTab === 'shipping' && (
-                  <div className="bg-emerald-50 p-8 rounded-[2rem] border border-emerald-100 flex items-start gap-4">
-                    <FiTruck className="text-emerald-500 text-3xl mt-1" />
-                    <p className="italic">Orders are typically processed within 24-48 hours. We offer worldwide express shipping with real-time tracking IDs provided via email.</p>
+                  <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 flex items-start gap-5">
+                    <FiTruck className="text-[#A4F000] text-4xl mt-1 shrink-0" />
+                    <p className="italic font-bold text-white/80 uppercase text-xs tracking-widest leading-loose">
+                      Global transit active. Node processing: 24h. Real-time encryption tracking provided upon dispatch.
+                    </p>
                   </div>
                 )}
               </motion.div>
@@ -256,16 +256,16 @@ export default function ProductDetails() {
           </div>
         </section>
 
-        {/* RELATED PRODUCTS - Improved Grid */}
+        {/* RELATED PRODUCTS */}
         {relatedProducts.length > 0 && (
           <section className="mt-24 lg:mt-40">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
               <div>
-                <span className="text-emerald-500 font-black uppercase text-xs tracking-[0.3em]">Similar Vibes</span>
-                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter mt-2">More from {product.category}</h2>
+                <span className="text-[#A4F000] font-black uppercase text-xs tracking-[0.4em] italic">Linked Assets</span>
+                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mt-4 uppercase italic">More from {product.category}</h2>
               </div>
-              <Link href="/product" className="group flex items-center gap-2 text-sm font-black text-slate-900 uppercase tracking-widest">
-                View Gallery <FiChevronRight className="group-hover:translate-x-1 transition-transform" />
+              <Link href="/product" className="group flex items-center gap-2 text-[10px] font-black text-[#A4F000] uppercase tracking-[0.3em] italic">
+                EXPLORE VAULT <FiChevronRight />
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -277,12 +277,12 @@ export default function ProductDetails() {
         )}
       </main>
 
-      {/* STICKY MOBILE BAR - Modern Pill Style */}
-      <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50 transform translate-z-0">
-        <div className="bg-slate-900/90 backdrop-blur-2xl text-white rounded-[2.5rem] p-3 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10">
+      {/* STICKY MOBILE BAR */}
+      <div className="lg:hidden fixed bottom-8 left-6 right-6 z-50">
+        <div className="bg-white/10 backdrop-blur-3xl text-white rounded-[2rem] p-3 flex items-center justify-between border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
           <div className="px-5">
-            <p className="text-[9px] font-black uppercase text-emerald-400 tracking-widest">Pricing</p>
-            <p className="text-xl font-black tracking-tighter">₹{product.price.toLocaleString()}</p>
+            <p className="text-[8px] font-black uppercase text-[#A4F000] tracking-widest italic">Protocol Price</p>
+            <p className="text-2xl font-black tracking-tighter italic">₹{product.price.toLocaleString()}</p>
           </div>
           <div className="w-[55%]">
             <AddToCartButton productId={product._id} quantity={quantity} />
@@ -293,23 +293,22 @@ export default function ProductDetails() {
   );
 }
 
-/* --- REUSABLE MINI COMPONENTS --- */
+/* --- REUSABLE COMPONENTS --- */
 
 function RelatedCard({ product, getDiscount }: { product: Product, getDiscount: any }) {
   const discount = getDiscount(product._id, product.category || "General");
   return (
-    <Link href={`/product/${product._id}`} className="group block bg-white p-5 rounded-[2.5rem] border border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 hover:-translate-y-2">
-      <div className="relative aspect-square bg-[#F8F9FA] rounded-[2rem] overflow-hidden mb-6">
-        {/* MINI BADGE */}
-        <div className="absolute top-0 left-0 z-10 bg-rose-500 text-white text-[9px] font-black px-3 py-1.5 rounded-br-2xl">
-          {discount}% OFF
+    <Link href={`/product/${product._id}`} className="group block bg-white/[0.03] p-5 rounded-[2.5rem] border border-white/5 hover:border-[#A4F000]/30 transition-all duration-700">
+      <div className="relative aspect-square bg-[#002B27] rounded-[2rem] overflow-hidden mb-6">
+        <div className="absolute top-0 left-0 z-10 bg-[#A4F000] text-[#003F3A] text-[10px] font-black px-4 py-2 rounded-br-2xl italic">
+          -{discount}%
         </div>
-        <img src={product.image} className="w-full h-full object-contain p-6 group-hover:scale-110 transition-transform duration-700" alt={product.name} />
+        <img src={product.image} className="w-full h-full object-contain p-8 group-hover:scale-110 transition-transform duration-1000 opacity-80 group-hover:opacity-100" alt={product.name} />
       </div>
-      <div className="space-y-1 px-2">
-        <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{product.category}</p>
-        <h3 className="font-bold text-slate-900 text-lg truncate uppercase tracking-tighter group-hover:text-emerald-600 transition-colors">{product.name}</h3>
-        <p className="font-black text-slate-900 text-xl tracking-tighter">₹{product.price.toLocaleString()}</p>
+      <div className="px-2">
+        <p className="text-[8px] font-black text-[#A4F000] uppercase tracking-[0.3em] mb-1">{product.category}</p>
+        <h3 className="font-black text-white text-lg tracking-tight uppercase italic truncate">{product.name}</h3>
+        <p className="font-black text-white/40 text-xl tracking-tighter mt-2 group-hover:text-white transition-colors italic">₹{product.price.toLocaleString()}</p>
       </div>
     </Link>
   );
@@ -317,21 +316,19 @@ function RelatedCard({ product, getDiscount }: { product: Product, getDiscount: 
 
 function TrustBadge({ icon, label, sub }: { icon: any, label: string, sub: string }) {
   return (
-    <div className="flex flex-col items-center text-center p-4 rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all group">
-      <div className="text-emerald-500 text-2xl mb-2 group-hover:scale-110 transition-transform">{icon}</div>
-      <div className="flex flex-col">
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{label}</span>
-        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{sub}</span>
-      </div>
+    <div className="flex flex-col items-center text-center p-5 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
+      <div className="text-[#A4F000] text-3xl mb-3 group-hover:scale-110 transition-transform">{icon}</div>
+      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white italic">{label}</span>
+      <span className="text-[8px] font-bold uppercase tracking-widest text-white/20 mt-1">{sub}</span>
     </div>
   );
 }
 
 function SpecItem({ label, value }: { label: string, value: string }) {
   return (
-    <div className="flex flex-col p-4 bg-slate-50 rounded-2xl border border-slate-100">
-      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
-      <span className="text-slate-900 font-bold">{value}</span>
+    <div className="flex flex-col p-5 bg-white/[0.02] rounded-[1.5rem] border border-white/5">
+      <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] mb-1">{label}</span>
+      <span className="text-white font-black text-sm uppercase italic tracking-widest">{value}</span>
     </div>
   )
 }
@@ -340,25 +337,20 @@ function TabButton({ children, active, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`pb-5 text-sm font-black uppercase tracking-[0.2em] transition-all relative ${active ? 'text-emerald-500' : 'text-slate-300 hover:text-slate-900'}`}
+      className={`pb-5 text-[10px] font-black uppercase tracking-[0.4em] transition-all relative italic ${active ? 'text-[#A4F000]' : 'text-white/20 hover:text-white/40'}`}
     >
       {children}
-      {active && <motion.div layoutId="tabLine" className="absolute bottom-0 left-0 right-0 h-1.5 bg-emerald-500 rounded-full" />}
+      {active && <motion.div layoutId="tabLine" className="absolute bottom-0 left-0 right-0 h-1 bg-[#A4F000] rounded-full shadow-[0_0_15px_rgba(164,240,0,0.5)]" />}
     </button>
   );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-40 animate-pulse">
-      <div className="grid lg:grid-cols-12 gap-20">
-        <div className="lg:col-span-7 aspect-square bg-slate-200 rounded-[4rem]" />
-        <div className="lg:col-span-5 space-y-12 pt-10">
-          <div className="h-6 bg-slate-200 rounded-full w-1/4" />
-          <div className="h-24 bg-slate-200 rounded-[2rem] w-full" />
-          <div className="h-12 bg-slate-200 rounded-full w-1/3" />
-          <div className="h-56 bg-slate-200 rounded-[3rem] w-full" />
-        </div>
+    <div className="bg-[#003F3A] min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center">
+         <div className="w-16 h-16 border-4 border-white/10 border-t-[#A4F000] rounded-full animate-spin mb-6" />
+         <span className="text-white/20 text-[10px] font-black uppercase tracking-[0.5em] animate-pulse">Decrypting Artifact</span>
       </div>
     </div>
   );
@@ -366,14 +358,12 @@ function LoadingSkeleton() {
 
 function ErrorState({ error }: { error: string | null }) {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-40 text-center">
-      <div className="bg-rose-50 rounded-[4rem] p-16 md:p-24 border-2 border-dashed border-rose-100 max-w-3xl mx-auto">
-        <div className="bg-rose-500 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-rose-200">
-          <FiRotateCcw className="text-white text-3xl" />
-        </div>
-        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">Protocol Terminated</h2>
-        <p className="text-slate-500 font-medium mb-12 text-lg italic">“{error || "The item could not be retrieved from the main server."}”</p>
-        <Link href="/product" className="inline-block bg-slate-900 text-white px-12 py-5 rounded-2xl font-black hover:bg-emerald-600 transition-all shadow-2xl shadow-slate-900/20">Return to Store</Link>
+    <div className="min-h-screen bg-[#003F3A] flex items-center justify-center p-6">
+      <div className="max-w-xl w-full bg-white/[0.03] backdrop-blur-3xl rounded-[3rem] p-12 border border-white/10 text-center">
+        <FiRotateCcw className="text-rose-500 text-6xl mx-auto mb-8 animate-spin-slow" />
+        <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-4">Node Disconnected</h2>
+        <p className="text-white/40 font-bold uppercase text-[10px] tracking-widest leading-loose mb-10 italic">“{error || "Artifact Signal Lost"}”</p>
+        <Link href="/product" className="inline-block bg-[#A4F000] text-[#003F3A] px-12 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white transition-all shadow-2xl">Return to Store</Link>
       </div>
     </div>
   );
