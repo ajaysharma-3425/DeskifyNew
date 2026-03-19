@@ -24,7 +24,6 @@ import {
   FiLogOut,
 } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
-import ThemeToggle from '../ui/ThemeToggle';
 
 const menuItems = [
   {
@@ -212,7 +211,7 @@ export default function AdminNavbar({
 
           {/* Right Action Icons */}
           <div className="flex items-center space-x-3 sm:space-x-5">
-            <ThemeToggle />
+            
             <button className="p-2 rounded-lg text-[#2F2F33] hover:bg-white border border-transparent hover:border-gray-200 transition-all relative">
               <FiBell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#F5F6F7]"></span>
